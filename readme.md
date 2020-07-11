@@ -1,5 +1,5 @@
 <div align="center">
-	<h1>SSPANEL - Soul Sign Scripts</h1>
+	<h1>SSPANEL - Soul Sign Script</h1>
     <img src="sspanel.png" alt="sspanel"/>
 	<br>
     <sub>
@@ -12,18 +12,18 @@
 
 ## 功能
 
-​    基本普适 SSPANEL 搭建的 S*/S*R/V*ay 站点，为其签到。
+​    基本普适 SSPANEL 搭建的站点，为其签到。
 
 ## 方法
 
-	- 配置参数 @domain：
-		1. 操作
-		2. 小齿轮
-		3. 域名
-	- 移植其他网站：
-		1. 修改 @loginURL
-		2. 修改 @domain
-		3. 修改 @name(可选)
+- 配置参数 @domain：
+    1. 操作
+    2. 小齿轮
+    3. 域名
+- 移植其他网站：
+    1. 修改 @loginURL
+    2. 修改 @domain
+    3. 修改 @name(可选)
 
 ## 愿景
 
@@ -43,5 +43,9 @@
 
 - [github](https://github.com/inu1255/soulsign-chrome)
 - [chrome extension](https://chrome.google.com/webstore/detail/%E9%AD%82%E7%AD%BE/llbielhggjekmfjikgkcaloghnibafdl?hl=zh-CN)
-- [firefox addon](https://addons.mozilla.org/zh-CN/firefox/addon/%E9%AD%82%E7%AD%BE/)
+- [firefox addon](https://addons.mozilla.org/zh-CN/firefox/addon/%E9%AD%82%E7%AD%BE)
+- [soul sign scripts](https://soulsign.inu1255.cn) & [my scripts](https://soulsign.inu1255.cn/?uid=1178)
 
+## 鸣谢
+
+所有给予灵感的脚本作者们
