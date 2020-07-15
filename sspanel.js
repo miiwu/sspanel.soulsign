@@ -1,15 +1,16 @@
 // ==UserScript==
 // @name              sspanel.dev
 // @namespace         https://soulsign.inu1255.cn/scripts/208
-// @version           1.1.1
+// @version           1.1.2
 // @author            Miao-Mico
-// @loginURL          https://xixicats.pw/
-// @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/SSPANEL.DEV
+// @loginURL          https://xixicats.pw
+// @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.dev
 // @expire            2000000
 // @domain            SSPANEL
 // @domain            SSR
 // @domain            V2RAY
 // @domain            xixicats.pw
+// @domain            suying999.net
 // @param             domain 域名,https://sspanel.com
 // @param             keyword_positive 登录后应该有的关键字,首页,我的
 // ==/UserScript==
@@ -19,56 +20,121 @@ var sspanel = {
         log_in: '/auth/login',
         sign_in: '/user/checkin'
     },
-    keyword: {
-        positive: ['首页', '我的'],
-        negative: ['忘记密码']
+    keyword: {// 检查是否在线时的关键词
+        positive: ['首页', '我的'],// 应该有的
+        negative: ['忘记密码'],// 不应该有的
     },
+    site: [],
 };
 
-var axios_cfg = {
-    post: {
-        method: 'post',
-        url: '',
-    },
-    get: {
-        method: 'get',
-        url: '',
+var log = {
+    exceptions: false,// 是否有异常或错误
+    site: [],
+}
+
+async function record_log(index, code, message) {// 记录日志
+    var site = {
+        index: 0,
+        message: '',
     }
-};
 
-async function config_params(param, axios_config, site_config) {
-    /* 合成网址 */
-    axios_config.get.url = param.domain + site_config.dir.log_in;
-    axios_config.post.url = param.domain + site_config.dir.sign_in;
+    if (!log.exceptions && parseInt(0) != parseInt(code)) {
+        log.exceptions = true;
+    }
 
-    /* 分离关键字 */
-    var buffer = param.keyword_positive.split(',');
-    for (var cnt = 0; cnt < buffer.length; cnt++) {
-        site_config.keyword.positive[site_config.keyword.positive.length] = buffer[cnt];
+    site.index = index;
+    site.message = message;
+
+    /* 压入 log 中的 site 类 */
+    log.site.push(site);
+}
+
+async function view_log(site_config) {// 打印日志
+    var log_string = '';
+
+    /* 从索引转换到域名 */
+    for (var cnt = 0; cnt < log.site.length; cnt++) {
+        var site = site_config.site[log.site[cnt].index];
+        /* 如果成功 */
+        if (site.succeed) {
+            continue;
+        }
+
+        /* 格式化输出 */
+        log_string = log_string + site.domain;
+        log_string = log_string + ': ';
+        log_string = log_string + log.site[cnt].message;
+    }
+
+    /* 决定通知强度 */
+    if (log.exceptions) {
+        throw log_string;
+    } else {
+        return log_string;
     }
 }
 
-async function check_online(param, axios_config, site_config) {
-    /* 配置域名字符串 */
-    await config_params(param, axios_config, site_config);
+async function split_domain_list(site_config, domain_list, separator) {// 分离域名列表
+    /* ！！！为什么 var site 放在此处 site_config.site 里全都变成最后一次 push 的 site */
 
+    /* 分离域名列表 */
+    domain_list = domain_list.split(separator);
+
+    for (var cnt = 0; cnt < domain_list.length; cnt++) {
+        var site = {
+            succeed: false,// 上一步是否成功
+            domain: '',// 域名在 site_config.site 中的索引
+            url: {
+                get: '',
+                post: '',
+            },
+        };
+
+        site.domain = domain_list[cnt];
+        site.url.get = site.domain + site_config.dir.log_in;
+        site.url.post = site.domain + site_config.dir.sign_in;
+
+        /* 压入 site_config 中的 site 类 */
+        site_config.site.push(site);
+    }
+}
+
+async function split_keyword_list(site_config, keyword_list, separator) {// 分离关键字列表
+    /* 分离关键词列表 */
+    keyword_list = keyword_list.split(separator);
+
+    /* 压入 site_config 中的 keyword.positive 类 */
+    for (var cnt = 0; cnt < keyword_list.length; cnt++) {
+        site_config.keyword.positive.push(keyword_list[cnt]);
+    }
+}
+
+async function load_param(site_config, param) {
+    /* 分离域名列表 */
+    await split_domain_list(site_config, param.domain, ',');
+
+    /* 分离关键字列表 */
+    await split_keyword_list(site_config, param.keyword_positive, ',');
+}
+
+async function check_online_site(site, keyword) {// 检查网址是否在线
     /* 获取登录信息 */
-    var { data } = await axios(axios_config.get);
+    var { data } = await axios.get(site.url.get);
 
     /* 创建用于匹配规则的变量 */
     var cnt = 0;
     var mismatch = 0;
 
     /* 判断 online 的关键词 ，应存在的 */
-    for (cnt = 0; cnt < site_config.keyword.positive.length; cnt++) {
-        if (!RegExp(site_config.keyword.positive[cnt]).test(data)) {
+    for (cnt = 0; cnt < keyword.positive.length; cnt++) {
+        if (!RegExp(keyword.positive[cnt]).test(data)) {
             mismatch = mismatch + 1;
         }
     }
 
     /* 判断 online 的关键词 ，不应存在的 */
-    for (cnt = 0; cnt < site_config.keyword.negative.length; cnt++) {
-        if (RegExp(site_config.keyword.negative[cnt]).test(data)) {
+    for (cnt = 0; cnt < keyword.negative.length; cnt++) {
+        if (RegExp(keyword.negative[cnt]).test(data)) {
             mismatch = mismatch + 1;
         }
     }
@@ -77,20 +143,52 @@ async function check_online(param, axios_config, site_config) {
     return Boolean(!mismatch);
 }
 
-exports.run = async function (param) {
-    /* 检查是否在线 */
-    if (!await check_online(param, axios_cfg, sspanel)) {
-        throw '请登录';
+async function check_online(site_config, param) {// 检查所有网址是否在线
+    /* 加载配置参数 */
+    await load_param(site_config, param);
+
+    /* 检测网址是否在线 */
+    var failed_cnt = 0;
+    for (var cnt = 0; cnt < site_config.site.length; cnt++) {
+        /* 检查是否在线 */
+        if (!await check_online_site(site_config.site[cnt], site_config.keyword)) {
+            await record_log(cnt, 1, '未登录');
+            failed_cnt = failed_cnt + 1;
+        } else {
+            site_config.site[cnt].online = true;
+        }
     }
 
-    /* 推送签到信息 */
-    var { data } = await axios(axios_cfg.post);
+    /* 返回是否全出错 */
+    return Boolean(!failed_cnt);
+}
 
-    /* 返回网址信息 */
-    return data.msg;
+async function sign_in(site_config, param) {// 签到
+    /* 加载配置参数 */
+    await check_online(site_config, param);
+
+    /* 检测网址是否在线 */
+    for (var cnt = 0; cnt < site_config.site.length; cnt++) {
+        /* 检查上一步是否成功，即是否在线 */
+        if (!site_config.site[cnt].succeed) {
+            continue;
+        }
+
+        /* 推送签到信息 */
+        var { data } = await axios.post(site_config.site[cnt].url.post);
+        record_log(cnt, 0, data.msg);
+    }
+}
+
+exports.run = async function (param) {
+    /* 签到 */
+    await sign_in(sspanel, param);
+
+    /* 打印日志 */
+    return await view_log(sspanel);
 };
 
 exports.check = async function (param) {
     /* 返回是否在线 */
-    return await check_online(param, axios_cfg, sspanel);
+    return await check_online(sspanel, param);
 };
