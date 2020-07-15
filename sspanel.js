@@ -1,16 +1,17 @@
 // ==UserScript==
-// @name              SSPANEL
-// @namespace         https://github.com/Miao-Mico/sspanel.soulsign
-// @version           1.1.0
+// @name              sspanel.dev
+// @namespace         https://soulsign.inu1255.cn/scripts/208
+// @version           1.1.1
 // @author            Miao-Mico
-// @loginURL          https://sspanel.com
-// @updateURL         https://github.com/Miao-Mico/sspanel.soulsign
+// @loginURL          https://xixicats.pw/
+// @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/SSPANEL.DEV
 // @expire            2000000
 // @domain            SSPANEL
 // @domain            SSR
 // @domain            V2RAY
-// @domain            sspanel.com
+// @domain            xixicats.pw
 // @param             domain 域名,https://sspanel.com
+// @param             keyword_positive 登录后应该有的关键字,首页,我的
 // ==/UserScript==
 
 var sspanel = {
@@ -19,11 +20,9 @@ var sspanel = {
         sign_in: '/user/checkin'
     },
     keyword: {
-        online: {
-            positive: ['首页', '我的'],
-            negative: ['忘记密码']
-        }
-    }
+        positive: ['首页', '我的'],
+        negative: ['忘记密码']
+    },
 };
 
 var axios_cfg = {
@@ -37,15 +36,21 @@ var axios_cfg = {
     }
 };
 
-async function config_domain(param, axios_config, site_config) {
+async function config_params(param, axios_config, site_config) {
     /* 合成网址 */
     axios_config.get.url = param.domain + site_config.dir.log_in;
     axios_config.post.url = param.domain + site_config.dir.sign_in;
+
+    /* 分离关键字 */
+    var buffer = param.keyword_positive.split(',');
+    for (var cnt = 0; cnt < buffer.length; cnt++) {
+        site_config.keyword.positive[site_config.keyword.positive.length] = buffer[cnt];
+    }
 }
 
 async function check_online(param, axios_config, site_config) {
     /* 配置域名字符串 */
-    await config_domain(param, axios_config, site_config);
+    await config_params(param, axios_config, site_config);
 
     /* 获取登录信息 */
     var { data } = await axios(axios_config.get);
@@ -55,15 +60,15 @@ async function check_online(param, axios_config, site_config) {
     var mismatch = 0;
 
     /* 判断 online 的关键词 ，应存在的 */
-    for (cnt = 0; cnt < site_config.keyword.online.positive.length; cnt++) {
-        if (!RegExp(site_config.keyword.online.positive[cnt]).test(data)) {
+    for (cnt = 0; cnt < site_config.keyword.positive.length; cnt++) {
+        if (!RegExp(site_config.keyword.positive[cnt]).test(data)) {
             mismatch = mismatch + 1;
         }
     }
 
     /* 判断 online 的关键词 ，不应存在的 */
-    for (cnt = 0; cnt < site_config.keyword.online.negative.length; cnt++) {
-        if (RegExp(site_config.keyword.online.negative[cnt]).test(data)) {
+    for (cnt = 0; cnt < site_config.keyword.negative.length; cnt++) {
+        if (RegExp(site_config.keyword.negative[cnt]).test(data)) {
             mismatch = mismatch + 1;
         }
     }
