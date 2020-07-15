@@ -1,11 +1,14 @@
 // ==UserScript==
 // @name              SSPANEL
 // @namespace         https://github.com/Miao-Mico/sspanel.soulsign
-// @version           1.0.0
+// @version           1.1.0
 // @author            Miao-Mico
 // @loginURL          https://sspanel.com
-// @updateURL         
-// @expire            2000
+// @updateURL         https://github.com/Miao-Mico/sspanel.soulsign
+// @expire            2000000
+// @domain            SSPANEL
+// @domain            SSR
+// @domain            V2RAY
 // @domain            sspanel.com
 // @param             domain 域名,https://sspanel.com
 // ==/UserScript==
@@ -15,10 +18,6 @@ var sspanel = {
         log_in: '/auth/login',
         sign_in: '/user/checkin'
     },
-    url: {
-        log_in: '',
-        sign_in: ''
-    },
     keyword: {
         online: {
             positive: ['首页', '我的'],
@@ -27,7 +26,7 @@ var sspanel = {
     }
 };
 
-var axios_config = {
+var axios_cfg = {
     post: {
         method: 'post',
         url: '',
@@ -38,16 +37,19 @@ var axios_config = {
     }
 };
 
-config_domain = async function (param, axios_config, site_config) {
-    /* 合成 url */
-    site_config.url.log_in = param.domain + site_config.dir.log_in;
-    site_config.url.sign_in = param.domain + site_config.dir.sign_in;
-
-    axios_config.post.url = site_config.url.sign_in;
-    axios_config.get.url = site_config.url.log_in;
+async function config_domain(param, axios_config, site_config) {
+    /* 合成网址 */
+    axios_config.get.url = param.domain + site_config.dir.log_in;
+    axios_config.post.url = param.domain + site_config.dir.sign_in;
 }
 
-match_keyword = async function (site_config, data) {
+async function check_online(param, axios_config, site_config) {
+    /* 配置域名字符串 */
+    await config_domain(param, axios_config, site_config);
+
+    /* 获取登录信息 */
+    var { data } = await axios(axios_config.get);
+
     /* 创建用于匹配规则的变量 */
     var cnt = 0;
     var mismatch = 0;
@@ -66,31 +68,24 @@ match_keyword = async function (site_config, data) {
         }
     }
 
-    return !mismatch;
-}
-
-check_online = async function (param, axios_config, site_config) {
-    // 配置域名字符串
-    config_domain(param, axios_config, site_config);
-
-    // 请求网站数据
-    var { data } = await axios(axios_config.get);
-
     /* 返回不匹配数量的反 */
-    return match_keyword(site_config, data);
+    return Boolean(!mismatch);
 }
 
 exports.run = async function (param) {
-    // 检查是否在线
-    if (!check_online(param)) {
+    /* 检查是否在线 */
+    if (!await check_online(param, axios_cfg, sspanel)) {
         throw '请登录';
     }
 
-    var { data } = await axios(axios_config.post);
+    /* 推送签到信息 */
+    var { data } = await axios(axios_cfg.post);
 
+    /* 返回网址信息 */
     return data.msg;
 };
 
 exports.check = async function (param) {
-    return check_online(param);
+    /* 返回是否在线 */
+    return await check_online(param, axios_cfg, sspanel);
 };
