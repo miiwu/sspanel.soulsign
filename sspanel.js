@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              sspanel.dev
 // @namespace         https://soulsign.inu1255.cn/scripts/208
-// @version           1.1.2
+// @version           1.1.3
 // @author            Miao-Mico
 // @loginURL          https://xixicats.pw
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.dev
@@ -11,8 +11,8 @@
 // @domain            V2RAY
 // @domain            xixicats.pw
 // @domain            suying999.net
-// @param             domain 域名,https://sspanel.com
-// @param             keyword_positive 登录后应该有的关键字,首页,我的
+// @param             domain 域名,https://i.cat,https://i.dog
+// @param             keyword_positive 登录后应该有的关键字,我的,首页
 // ==/UserScript==
 
 var sspanel = {
