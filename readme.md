@@ -1,8 +1,10 @@
 <div align="center">
-	<h1>SSPANEL - Soul Sign Script</h1>
+	<h1>SSPANEL<sup>Miao-Mico Core</sup> - Soul Sign Script</h1>
 </div>
 
 ## 功能
+
+本脚本预计作为 SSPANEL 系列的 require 核心。
 
 基本普适 SSPANEL 搭建的站点，为其签到。
 
@@ -24,6 +26,7 @@
 - [x] SSPANEL 普适签到脚本
 - [x] 通过 @param domain 管理多个站点
 - [x] 通过 @param keyword 配置检测关键词
+- [ ] 分离单独核心脚本，应用脚本轻量化
 
 ## 更新
 
@@ -41,6 +44,8 @@
 - 1.1.3
   1. 修改‘域名’文本框提示的文本
   2. 修改‘登录后应该有的关键字’文本框提示的文本
+- 1.2.0
+  1. 尝试修改原脚本
 
 ## 鸣谢
 
