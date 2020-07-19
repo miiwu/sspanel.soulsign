@@ -1,5 +1,5 @@
 <div align="center">
-	<h1>Miao-Mico Core - Soul Sign Script</h1>
+	<h1>SSPANEL - Soul Sign Script</h1>
 </div>
 
 ## 功能
