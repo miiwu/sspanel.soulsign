@@ -28,7 +28,7 @@
                 negative: ["忘记密码"], // 不应该有的
             }, // 检查是否在线时的关键词
             core: {
-                url: "sspanel_mmc.js", // 地址
+                url: "https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc.js", // 地址
                 hook: false, // 钩子
             }, // 依赖的核心
         };
@@ -92,6 +92,8 @@
 - [x] 通过 @param keyword 配置检测关键词
 - [x] 分离单独核心脚本，应用脚本轻量化
 - [ ] 再分离，可适用多种网站方式
+- [ ] 处理失败时的多网站登录问题
+- [ ] 格式化输出
 
 ## 更新
 
