@@ -4,7 +4,7 @@
 
 ## 功能
 
-本脚本预计作为 SSPANEL 系列的 require 核心。
+本脚本预计作为 `SSPANEL` 系列的 **`require`** 核心。
 
 基本普适 SSPANEL 搭建的站点，为其签到。
 
@@ -51,25 +51,33 @@
 
 - 返回值
 
-    1. xxx.debug()
+    1. `xxx.debug()`
 
         - 返回所有变量值
         
-    2. xxx.record_log(site, code, message)
+    2. `xxx.record_log(site, code, message)`
 
-        - 返回 message
+        - 返回 `message`
 
-    3. xxx.sign_in()
+    3. `xxx.publish_pipe(which, message)`
+
+        - 返回 `message`
+
+    4. `xxx.subscribe_pipe(which)`
+
+        - 返回 `xxx.publish_pipe(which, message)` 中的 `message`
+
+    5. `xxx.sign_in()`
 
         - 成功：❤️ sspanel.mmc ❤️
         - 失败：❤️ sspanel.mmc ❤️ < ❗ 网站: 问题>
 
         注：<...>，意为里面的内容可能会是重复的多个
 
-    4. xxx.check_online()
+    6. `xxx.check_online()`
 
-        - 成功：true
-        - 失败：false
+        - 成功：`true`
+        - 失败：`false`
 
 - 例子
 
@@ -88,8 +96,8 @@
 ## 愿景
 
 - [x] SSPANEL 普适签到脚本
-- [x] 通过 @param domain 管理多个站点
-- [x] 通过 @param keyword 配置检测关键词
+- [x] 通过 `@param domain` 管理多个站点
+- [x] 通过 `@param keyword` 配置检测关键词
 - [x] 分离单独核心脚本，应用脚本轻量化
 - [ ] 再分离，可适用多种网站方式
 - [ ] 处理失败时的多网站登录问题
@@ -132,6 +140,16 @@
      - 失败：❤️ sspanel.mmc ❤️< ❗ 网站: 问题>
      
        注：<...>，意为里面的内容可能会是重复的多个
+
+- 1.2.2
+  
+  1. 支持在 `hook` 中引入 `param`
+  2. 支持 `pipe`，`hook` 间相互通信
+  3. 增加 `asserts`，支持适应不同参数列表，主要是有无 @param
+  4. 支持 `configs`，存储传入的参数，`site_config` & `param_config`
+  5. 增加 `debugs`
+  6. 增加 `system_log()`，方便调试，`record_log()` 也会调用它
+  7. 增加 `debug()`，支持根据等级输出
 
 ## 鸣谢
 

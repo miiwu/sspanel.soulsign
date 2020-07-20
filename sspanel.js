@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              sspanel.dev
 // @namespace         https://soulsign.inu1255.cn/scripts/208
-// @version           1.2.1
+// @version           1.2.2
 // @author            Miao-Mico
 // @loginURL          https://xixicats.pw
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.dev
