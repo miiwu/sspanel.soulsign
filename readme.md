@@ -19,6 +19,8 @@
         ```javascript
         
         var sspanel = {
+            core: "https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc.js", // 地址
+            domain: ["https://suying999.net", "https://xixicats.pw"], // 域名列表
             dir: {
                 log_in: "/auth/login", // 登录网址主机的
                 sign_in: "/user/checkin", // 签到网址主机的
@@ -27,17 +29,14 @@
                 positive: ["首页", "我的"], // 应该有的
                 negative: ["忘记密码"], // 不应该有的
             }, // 检查是否在线时的关键词
-            core: {
-                url: "https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc.js", // 地址
-                hook: false, // 钩子
-            }, // 依赖的核心
+            hook: false, // 钩子
         };
         
         ```
-
-    - param: 调用者的脚本参数
-
-        ```javascript
+    
+- param: 调用者的脚本参数
+  
+    ```javascript
         
         // ==UserScript==
         // ...
@@ -47,34 +46,38 @@
         // ...
         // ==/UserScript==
         
-        ```
-
+    ```
+    
 - 返回值
 
-    1. `xxx.debug()`
+    1. `xxx.debug(level)`
 
-        - 返回所有变量值
+        - 返回变量值
         
     2. `xxx.record_log(site, code, message)`
 
         - 返回 `message`
 
-    3. `xxx.publish_pipe(which, message)`
+    3. `xxx.update_config(site_config, param_config)`<sup>dev</sup>
+
+        - 无
+
+    4. `xxx.publish_pipe(which, message)`
 
         - 返回 `message`
 
-    4. `xxx.subscribe_pipe(which)`
+    5. `xxx.subscribe_pipe(which)`
 
         - 返回 `xxx.publish_pipe(which, message)` 中的 `message`
 
-    5. `xxx.sign_in()`
+    6. `xxx.sign_in()`
 
         - 成功：❤️ sspanel.mmc ❤️
         - 失败：❤️ sspanel.mmc ❤️ < ❗ 网站: 问题>
 
         注：<...>，意为里面的内容可能会是重复的多个
 
-    6. `xxx.check_online()`
+    7. `xxx.check_online()`
 
         - 成功：`true`
         - 失败：`false`
@@ -129,7 +132,7 @@
   
   1. 形成模板
 - 1.2.1
-  1. 支持 hook，可能能支持其他网站类型了
+  1. 支持 `hook`，可能能支持其他网站类型了
   
   2. 说明：
      
@@ -150,6 +153,13 @@
   5. 增加 `debugs`
   6. 增加 `system_log()`，方便调试，`record_log()` 也会调用它
   7. 增加 `debug()`，支持根据等级输出
+
+- 1.2.3
+  
+  1. 改变了网址配置的格式
+  2. 修复了更新 `domain` 时，`sites` 内索引不对的情况
+  3. 改变部分 `var` 为 `let`，主要是函数内地局部变量
+  4. 增加 `update_config()`<sup>dev</sup>，用来自动更新配置参数
 
 ## 鸣谢
 

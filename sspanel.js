@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              sspanel.dev
 // @namespace         https://soulsign.inu1255.cn/scripts/208
-// @version           1.2.2
+// @version           1.2.3
 // @author            Miao-Mico
 // @loginURL          https://xixicats.pw
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.dev
@@ -16,6 +16,8 @@
 // ==/UserScript==
 
 var sspanel = {
+    core: "https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc.js", // 地址
+    domain: ["https://suying999.net", "https://xixicats.pw"], // 域名列表
     dir: {
         log_in: "/auth/login", // 登录网址主机的
         sign_in: "/user/checkin", // 签到网址主机的
@@ -24,16 +26,13 @@ var sspanel = {
         positive: ["首页", "我的"], // 应该有的
         negative: ["忘记密码"], // 不应该有的
     }, // 检查是否在线时的关键词
-    core: {
-        url: "https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc.js", // 地址
-        hook: false, // 钩子
-    }, // 依赖的核心
+    hook: false, // 钩子
 };
 
 var req, mmc;
 
 exports.run = async function (param) {
-    req = await require(sspanel.core.url);
+    req = await require(sspanel.core);
     mmc = await req(sspanel, param);
 
     /* 返回签到信息 */
@@ -41,7 +40,7 @@ exports.run = async function (param) {
 };
 
 exports.check = async function (param) {
-    req = await require(sspanel.core.url);
+    req = await require(sspanel.core);
     mmc = await req(sspanel, param);
 
     /* 返回是否在线 */
