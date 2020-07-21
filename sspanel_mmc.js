@@ -2,7 +2,7 @@
 // @name              sspanel.mmc
 // @namespace         https://soulsign.inu1255.cn/scripts/213
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc
-// @version           1.2.3
+// @version           1.2.4
 // @author            Miao-Mico
 // @expire            2000000
 // @domain            sspanel
@@ -85,8 +85,8 @@
                 config: level >= 3 ? configs : {},
                 site: level >= 1 ? sites : {},
                 keyword: keywords,
-                pipe: pipes,
-                hook: hooks,
+                pipe: level >= 1 ? pipes : {},
+                hook: level >= 1 ? hooks : {},
                 log: logs,
             };
         } else {
@@ -111,20 +111,27 @@
     } // 运行时前
 
     async function publish_pipe(which, message) {
+        await system_log("system", 0, "publish_pipe(): publish the pipes");
+
         if (parseInt(pipes.length) <= parseInt(which)) {
             pipes.push({ index: which, data: message });
         } else {
             pipes[which].data = message;
         }
 
+        await system_log("system", 0, `{ which: ${which}, message: ${message.toString()} }`);
         return message;
     } // 发布管道信息
 
     async function subscribe_pipe(which) {
+        await system_log("system", 0, "subscribe_pipe(): subscribe the pipes");
+
         return pipes[which].data;
     } // 订阅管道信息
 
     async function config_log() {
+        await system_log("system", 0, "config_log(): config the logs");
+
         logs.sites = sites.length;
 
         /* 生成对应 sites 的日志包 */
@@ -136,21 +143,22 @@
                 message: "",
             });
         }
+
+        await system_log("system", 0, logs.pool);
     } // 配置日志
 
     async function active_log(whether) {
+        await system_log("system", 0, "active_log(): active the logs");
+        await system_log("system", 0, `active: ${whether}`);
+
         logs.active = whether;
     } // 激活日志记录
 
     async function record_log(site, code, message) {
-        await system_log(site, code, message);
+        await system_log("system", 0, "record_log(): record the logs");
 
         if (logs.active) {
-            await system_log(
-                "system",
-                0,
-                `record log: { index ${site.index} code ${code} message ${message} }`
-            );
+            await system_log(site, code, message);
 
             if (parseInt(logs.pool.length) <= parseInt(site.index)) {
                 logs.pool.push({
@@ -175,27 +183,31 @@
     } // 记录日志
 
     async function view_log() {
-        let log_string = "❤️ sspanel.mmc ❤️";
-
-        /* 从索引转换到域名 */
-        for (let cnt = 0; cnt < logs.sites; cnt++) {
-            /* 如果成功 */
-            if (logs.pool[cnt].code) {
-                /* 格式化输出 */
-                log_string = log_string + " ❗ ";
-                log_string = log_string + sites[cnt].domain;
-                log_string = log_string + ": ";
-                log_string = log_string + logs.pool[cnt].message;
-            } else {
-                continue;
-            }
-        }
-
-        /* 决定通知强度 */
-        if (Boolean(logs.level)) {
-            throw log_string;
+        if (debugs.enable) {
+            return await debug();
         } else {
-            return log_string;
+            let log_string = "❤️ sspanel.mmc ❤️";
+
+            /* 从索引转换到域名 */
+            for (let cnt = 0; cnt < logs.sites; cnt++) {
+                /* 如果成功 */
+                if (logs.pool[cnt].code) {
+                    /* 格式化输出 */
+                    log_string = log_string + " ❗ ";
+                    log_string = log_string + sites[cnt].domain;
+                    log_string = log_string + ": ";
+                    log_string = log_string + logs.pool[cnt].message;
+                } else {
+                    continue;
+                }
+            }
+
+            /* 决定通知强度 */
+            if (Boolean(logs.level)) {
+                throw log_string;
+            } else {
+                return log_string;
+            }
         }
     } // 打印日志
 
