@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              natfrp领流量
 // @namespace         https://soulsign.inu1255.cn/scripts/216
-// @version           1.2.4
+// @version           1.2.5
 // @author            sunzehui
 // @author            Miao-Mico
 // @loginURL          https://www.natfrp.com/user

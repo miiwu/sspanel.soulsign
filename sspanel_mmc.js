@@ -2,7 +2,7 @@
 // @name              sspanel.mmc
 // @namespace         https://soulsign.inu1255.cn/scripts/213
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc
-// @version           1.2.4
+// @version           1.2.5
 // @author            Miao-Mico
 // @expire            2000000
 // @domain            sspanel
@@ -12,12 +12,19 @@
 // ==/UserScript==
 
 (function () {
+    const about = {
+        author: "M-M",
+        version: "1.2.5",
+        licence: "Apache-2.0 License",
+        trademark: "❤️ sspanel.mmc ❤️",
+    }; // 关于
+
     var runtime = false; // 是否是运行时
 
     var debugs = {
-        enable: false,
-        system: [],
-    };
+        enable: false, // 是否开启
+        system: [], // 存放系统日志
+    }; // 调试
 
     var asserts = {
         domain: { site_config: false, param_config: false },
@@ -30,8 +37,8 @@
     var logs = {
         active: true, // 是否记录
         level: 0, // 是否有异常或错误
-        sites: 0,
-        pool: [],
+        sites: 0, // 网站个数
+        pool: [], // 存放网站日志
     }; // 日志
 
     var hooks = {
@@ -49,20 +56,21 @@
     }; // 钩子
 
     var keywords = {
-        positive: [],
-        negative: [],
-        mismatch: [],
+        positive: [], // 应该存在的
+        negative: [], // 不应该存在的
+        mismatch: [], // 不匹配的
     }; // 关键字
 
     var configs = {
-        site_config: {},
-        param_config: {},
+        site_config: {}, // 网站配置
+        param_config: {}, // 参数配置
     }; // 传入的参数
 
-    var pipes = [];
+    var pipes = []; // 管道
 
     async function system_log(object, code, message) {
         if (debugs.enable) {
+            /* 压入系统日志 */
             debugs.system.push({
                 index: debugs.system.length,
                 object: object,
@@ -70,11 +78,14 @@
                 message: message,
             });
 
+            /* 抛出系统错误 */
             if (/system/.test(object) && code) {
-                throw "❤️ sspanel.mmc ❤️" + " ⁉️ " + message;
+                throw about.trademark + " ⁉️ " + message;
             }
         }
-    }
+
+        return message;
+    } // 系统日志
 
     async function debug(level = 0) {
         if (debugs.enable) {
@@ -91,12 +102,13 @@
             };
         } else {
             return (
-                "❤️ sspanel.mmc ❤️" +
+                about.trademark +
                 " ⁉️ " +
-                "部分数据可能未记录，请尝试 var xxx = require(site_config.core), xxx = xxx(site_config, param_config, true); 并刷新！"
+                "部分数据可能未记录。" +
+                "请尝试 var xxx = require(site_config.core), xxx = xxx(site_config, param_config, true); 并刷新！"
             );
         }
-    } // 调试用
+    } // 调试
 
     async function create_time(something) {
         let pipe;
@@ -105,28 +117,29 @@
             pipe = something();
         }
 
-        runtime = runtime + 1;
+        runtime++;
 
         return pipe;
     } // 运行时前
 
-    async function publish_pipe(which, message) {
+    async function publish_pipe(id, data) {
         await system_log("system", 0, "publish_pipe(): publish the pipes");
 
-        if (parseInt(pipes.length) <= parseInt(which)) {
-            pipes.push({ index: which, data: message });
+        if (parseInt(pipes.length) <= parseInt(id)) {
+            pipes.push({ index: id, data: data });
         } else {
-            pipes[which].data = message;
+            pipes[id].data = data;
         }
 
-        await system_log("system", 0, `{ which: ${which}, message: ${message.toString()} }`);
-        return message;
+        await system_log("publish_pipe()", 0, { index: id, data: data });
+        return data;
     } // 发布管道信息
 
-    async function subscribe_pipe(which) {
+    async function subscribe_pipe(id) {
         await system_log("system", 0, "subscribe_pipe(): subscribe the pipes");
+        await system_log("subscribe_pipe()", 0, pipes[id]);
 
-        return pipes[which].data;
+        return pipes[id].data;
     } // 订阅管道信息
 
     async function config_log() {
@@ -144,12 +157,12 @@
             });
         }
 
-        await system_log("system", 0, logs.pool);
+        await system_log("config_log()", 0, logs);
     } // 配置日志
 
     async function active_log(whether) {
         await system_log("system", 0, "active_log(): active the logs");
-        await system_log("system", 0, `active: ${whether}`);
+        await system_log("active_log()", 0, `active: ${whether}`);
 
         logs.active = whether;
     } // 激活日志记录
@@ -178,28 +191,33 @@
         for (let index = 0; index < logs.sites; index++) {
             logs.level = logs.level + logs.pool[index].code;
         }
+        await system_log("record_log()", 0, `log levels: ${logs.level}`);
 
+        await system_log("record_log()", 0, { site: site, code: code, message: message });
         return message;
     } // 记录日志
 
-    async function view_log() {
+    async function view_log(full = false) {
+        await system_log("system", 0, "view_log(): view the logs");
+        await system_log("view_log()", 0, `debugs enable: ${debugs.enable}`);
+
         if (debugs.enable) {
             return await debug();
         } else {
-            let log_string = "❤️ sspanel.mmc ❤️";
+            let log_string = about.trademark;
 
             /* 从索引转换到域名 */
             for (let cnt = 0; cnt < logs.sites; cnt++) {
-                /* 如果成功 */
-                if (logs.pool[cnt].code) {
-                    /* 格式化输出 */
-                    log_string = log_string + " ❗ ";
-                    log_string = log_string + sites[cnt].domain;
-                    log_string = log_string + ": ";
-                    log_string = log_string + logs.pool[cnt].message;
-                } else {
+                /* 非完整时跳过正确的 */
+                if (!full && !logs.pool[cnt].code) {
                     continue;
                 }
+
+                /* 格式化输出 */
+                log_string = log_string.concat(
+                    logs.pool[cnt].code ? " ❗ " : " ✔ ",
+                    sites[cnt].domain + ": " + logs.pool[cnt].message
+                );
             }
 
             /* 决定通知强度 */
@@ -214,31 +232,35 @@
     async function config_hook(site_config) {
         await system_log("system", 0, "config_hook(): config hooks");
 
+        /* 配置 get_log_in */
         if (asserts.hook.get_log_in) {
             hooks.get_log_in = site_config.hook.get_log_in;
 
-            await system_log("system", 0, "hook get_log_in");
+            await system_log("config_hook()", 0, "hook get_log_in");
         }
 
+        /* 配置 post_sign_in */
         if (asserts.hook.post_sign_in) {
             hooks.post_sign_in = site_config.hook.post_sign_in;
 
-            await system_log("system", 0, "hook post_sign_in");
+            await system_log("config_hook()", 0, "hook post_sign_in");
         }
     } // 配置钩子
 
     async function handle_hook(hook, site, param) {
         await system_log("system", 0, "handle_hook(): handle hooks");
+        await system_log("handle_hook()", 0, { hook: hook, site: site, param: param });
 
-        await system_log("system", 0, `{ hook: ${hook} site: ${site} param: ${param}}`);
-
+        /* hook */
         return await hook(site, param);
     } // 处理钩子函数
 
     async function assert(site_config, param_config) {
         await system_log("system", 0, "assert(): assert input configs");
 
-        async function assert_type(rule, message, callback, alarm = true) {
+        async function assert_type(rule, message, callback) {
+            await system_log("system", 0, "assert_type(): assert input type");
+
             let match = {
                 undefined: {
                     code: 0,
@@ -249,7 +271,18 @@
                     box: [],
                 },
                 enable: async function (index) {
+                    await system_log("assert_type()", 0, "enable()");
+
                     return !(match.undefined.box[index] + match.null.box[index]);
+                },
+                alarm: async function () {
+                    await system_log("assert_type()", 0, "alarm()");
+
+                    if (parseInt(rule.length) <= parseInt(match.undefined.code)) {
+                        await system_log("system", 1, message + " 缺失");
+                    } else if (rule.length <= match.null.code) {
+                        await system_log("system", 1, message + " 为空");
+                    }
                 },
             }; // 匹配数
 
@@ -268,33 +301,34 @@
                 match.null.code = match.null.code + boolean;
             }
 
-            await system_log(
-                "system",
-                0,
-                `assert ${message} result: ` +
-                    `{ rule: ${rule.length} undefined: ${match.undefined.code} null: ${match.null.code} }`
-            );
+            await system_log("assert_type()", 0, {
+                message: message,
+                length: {
+                    rule: rule.length,
+                    undefined: match.undefined.code,
+                    null: match.null.code,
+                },
+            });
 
             await callback(match);
 
-            if (alarm) {
-                if (parseInt(rule.length) <= parseInt(match.undefined.code)) {
-                    await system_log("system", 1, message + " 缺失");
-                } else if (rule.length <= match.null.code) {
-                    await system_log("system", 1, message + " 为空");
-                }
-            }
-
-            await system_log("system", 0, `assert ${message} passed`);
+            await system_log("assert_type()", 0, {
+                rule: rule,
+                message: message,
+                callback: callback,
+            });
         } // 断言类型
 
         /* 断言域名 */
         await assert_type([site_config.domain, param_config.domain], "domain", async function (
             match
         ) {
+            await match.alarm();
+
             asserts.domain.site_config = await match.enable(0);
             asserts.domain.param_config = await match.enable(1);
         });
+        await system_log("assert()", 0, asserts.domain);
 
         /* 断言关键字 */
         await assert_type(
@@ -305,6 +339,8 @@
             ],
             "keyword",
             async function (match) {
+                await match.alarm();
+
                 asserts.keyword.site_config.positive = await match.enable(0);
                 asserts.keyword.site_config.negative = await match.enable(1);
                 asserts.keyword.param_config = await match.enable(2);
@@ -318,15 +354,13 @@
             async function (match) {
                 asserts.hook.get_log_in = await match.enable(0);
                 asserts.hook.post_sign_in = await match.enable(1);
-            },
-            false
+            }
         );
 
         /* 获取参数列表 */
         configs.site_config = site_config;
         configs.param_config = param_config;
-
-        await system_log("system", 0, "assign input configs to configs");
+        await system_log("assert()", 0, configs);
     } // 断言
 
     async function load_domain_list(site_config, domain_list, separator) {
@@ -357,13 +391,13 @@
 
         /* 清空列表 */
         sites.length = 0;
-        await system_log("system", 0, "clear sites");
+        await system_log("load_domain_list()", 0, "clear sites");
 
         /* 分离域名列表 */
         if (asserts.domain.site_config) {
             await config_site(site_config.domain, site_config.dir);
 
-            await system_log("system", 0, "push site_config.domain");
+            await system_log("load_domain_list()", 0, "push site_config.domain");
         }
 
         if (asserts.domain.param_config) {
@@ -371,8 +405,14 @@
 
             await config_site(domain_list, site_config.dir);
 
-            await system_log("system", 0, "push domain_list");
+            await system_log("load_domain_list()", 0, "push domain_list");
         }
+
+        await system_log("load_domain_list()", 0, {
+            site_config: site_config,
+            domain_list: domain_list,
+            separator: separator,
+        });
     } // 分离域名列表
 
     async function load_keyword_list(site_config, keyword_list, separator) {
@@ -382,13 +422,13 @@
         keywords.positive.length = 0;
         keywords.negative.length = 0;
         keywords.mismatch.length = 0;
-        await system_log("system", 0, "clear keywords");
+        await system_log("load_keyword_list()", 0, "clear keywords");
 
         if (asserts.keyword.site_config) {
             keywords.positive = site_config.keyword.positive;
             keywords.negative = site_config.keyword.negative;
 
-            await system_log("system", 0, "push site_config.keywords");
+            await system_log("load_keyword_list()", 0, "push site_config.keywords");
         }
 
         if (asserts.keyword.param_config) {
@@ -399,7 +439,7 @@
                 keywords.positive.push(keyword_list[cnt]);
             }
 
-            await system_log("system", 0, "push keyword_list");
+            await system_log("load_keyword_list()", 0, "push keyword_list");
         }
     } // 加载关键字列表
 
@@ -427,7 +467,6 @@
 
         /* 获取网站返回信息 */
         let data_cos = await handle_hook(hooks.get_log_in, site, configs.param_config);
-
         await record_log(site, data_cos.code, data_cos.data);
 
         if (!data_cos.code) {
@@ -488,23 +527,23 @@
         for (let cnt = 0; cnt < sites.length; cnt++) {
             /* 检查是否在线 */
             if (!(await check_online_site(sites[cnt]))) {
-                await system_log("system", 0, `check online for site: ${sites[cnt]}`);
+                await system_log("check_online()", 0, { site: sites[cnt] });
 
                 offline = offline + 1;
             }
         }
-        await system_log("system", 0, `check online for sites, offline: ${offline}`);
+        await system_log("check_online()", 0, `check online for sites, offline: ${offline}`);
 
         /* 返回在线数量的布尔值 */
         return Boolean(!offline);
     } // 检查所有网址是否在线
 
-    async function sign_in() {
+    async function sign_in(full_log = false) {
         await system_log("system", 0, "sign_in(): sign in for sites");
 
         /* 检测网址是否在线  */
         await check_online();
-        await system_log("system", 0, "have checked online status for sites");
+        await system_log("sign_in()", 0, "have checked online status for sites");
 
         for (let cnt = 0; cnt < logs.sites; cnt++) {
             /* 检查上一步是否成功，即本站点是否在线 */
@@ -519,9 +558,10 @@
                 await record_log(sites[cnt], data_si.code, data_si.data);
             }
         }
+        await system_log("sign_in()", 0, "have signed in for sites");
 
         /* 打印日志 */
-        return await view_log();
+        return await view_log(full_log);
     } // 签到
 
     module.exports = async function (site_config, param_config, debug_enable = false) {
@@ -533,6 +573,7 @@
         });
 
         return {
+            about: about, // 关于
             debug: debug, // 调试
             record_log: record_log, // 记录日志
             update_config: update_config, // 更新配置

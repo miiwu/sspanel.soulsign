@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              飘云阁
 // @namespace         https://soulsign.inu1255.cn?account=Miao-Mico
-// @version           1.2.4
+// @version           1.2.5
 // @author            honourjawy
 // @author            Miao-Mico
 // @loginURL          https://www.chinapyg.com

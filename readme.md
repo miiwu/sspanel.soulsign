@@ -50,34 +50,38 @@
     
 - 返回值
 
-    1. `xxx.debug(level)`
+    1. `xxx.about`
+
+        - 返回其值
+
+    2. `xxx.debug(level)`
 
         - 返回变量值
-        
-    2. `xxx.record_log(site, code, message)`
+
+    3. `xxx.record_log(site, code, message)`
 
         - 返回 `message`
 
-    3. `xxx.update_config(site_config, param_config)`<sup>dev</sup>
+    4. `xxx.update_config(site_config, param_config)`<sup>dev</sup>
 
         - 无
 
-    4. `xxx.publish_pipe(which, message)`
+    5. `xxx.publish_pipe(which, message)`
 
         - 返回 `message`
 
-    5. `xxx.subscribe_pipe(which)`
+    6. `xxx.subscribe_pipe(which)`
 
         - 返回 `xxx.publish_pipe(which, message)` 中的 `message`
 
-    6. `xxx.sign_in()`
+    7. `xxx.sign_in()`
 
         - 成功：❤️ sspanel.mmc ❤️
         - 失败：❤️ sspanel.mmc ❤️ < ❗ 网站: 问题>
 
         注：<...>，意为里面的内容可能会是重复的多个
 
-    7. `xxx.check_online()`
+    8. `xxx.check_online()`
 
         - 成功：`true`
         - 失败：`false`
@@ -95,6 +99,8 @@
   ```
 
   - [spanel.js](https://github.com/Miao-Mico/sspanel.soulsign/blob/dev.mm_core/sspanel.js)
+  - [natfrp.js](https://github.com/Miao-Mico/sspanel.soulsign/blob/dev.mm_core/natfrp.js)
+  - [discuz_pyg.js](https://github.com/Miao-Mico/sspanel.soulsign/blob/dev.mm_core/discuz_pyg.js)
 
 ## 愿景
 
@@ -102,7 +108,7 @@
 - [x] 通过 `@param domain` 管理多个站点
 - [x] 通过 `@param keyword` 配置检测关键词
 - [x] 分离单独核心脚本，应用脚本轻量化
-- [ ] 再分离，可适用多种网站方式
+- [x] 可适用多种网站方式
 - [ ] 处理失败时的多网站登录问题
 - [ ] 格式化输出
 
@@ -172,6 +178,13 @@
   1. 增加 `飘云阁.js`
   2. 增加 `natfrp领流量.js`
   3. 证明可以 `hook` 为其他类型签到
+  
+- 1.2.5
+
+  1. 增加 `about`
+  2. 修改 `assert_type()`
+  3. 修改 `view_log()` & `sign_in()`，支持结果全输出
+  4. 增加更多 `system_log()`，在 `debug` 运行时记录日志
 
 ## 鸣谢
 
