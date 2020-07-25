@@ -2,7 +2,7 @@
 // @name              mmc
 // @namespace         https://soulsign.inu1255.cn/scripts/220
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/mmc
-// @version           1.2.6
+// @version           1.2.7
 // @author            Miao-Mico
 // @expire            2000000
 // @domain            *
@@ -11,7 +11,7 @@
 (function () {
     const about = {
         author: "M-M", // 作者
-        version: "1.2.6", // 版本
+        version: "1.2.7", // 版本
         licence: "Apache-2.0 License", // 许可
         trademark: "❤️ mmc ❤️", // 标志
     }; // 关于
@@ -115,12 +115,6 @@
             );
         }
     } // 调试
-
-    async function create_time(something) {
-        if (!runtime++) {
-            return something();
-        }
-    } // 运行时前
 
     async function config_variable(variable, template) {
         variable.length = 0;
@@ -657,9 +651,8 @@
         /* 使能调试 */
         debugs.enable = debug_enable;
 
-        await create_time(async function () {
-            await update_config(site_config, param_config);
-        });
+        /* 更新配置 */
+        await update_config(site_config, param_config);
 
         return {
             about: about, // 关于

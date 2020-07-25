@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              natfrp
 // @namespace         https://soulsign.inu1255.cn/scripts/219
-// @version           1.2.6
+// @version           1.2.7
 // @author            sunzehui
 // @author            Miao-Mico
 // @loginURL          https://www.natfrp.com/user

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              discuz
 // @namespace         https://soulsign.inu1255.cn/scripts/221
-// @version           1.2.6
+// @version           1.2.7
 // @author            honourjawy
 // @author            Miao-Mico
 // @loginURL          https://www.chinapyg.com
