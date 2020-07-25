@@ -1,16 +1,17 @@
 // ==UserScript==
 // @name              sspanel
-// @namespace         https://soulsign.inu1255.cn/scripts/208
-// @version           1.2.7
+// @namespace         https://soulsign.inu1255.cn/scripts/222
+// @version           1.2.8
 // @author            Miao-Mico
 // @loginURL          https://xixicats.pw
-// @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.dev
+// @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel
 // @grant             require
 // @expire            2000000
 // @domain            sspanel
 // @domain            ssr
 // @domain            v2ray
-// @domain            *
+// @domain            *.*
+// @domain            *.*.*
 // @param             domain 域名,([http://]i.cat),([https://]i.dog)
 // ==/UserScript==
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              discuz
 // @namespace         https://soulsign.inu1255.cn/scripts/221
-// @version           1.2.7
+// @version           1.2.8
 // @author            honourjawy
 // @author            Miao-Mico
 // @loginURL          https://www.chinapyg.com
@@ -9,10 +9,9 @@
 // @grant             require
 // @expire            2000000
 // @domain            discuz
-// @domain            www.chinapyg.com
-// @domain            www.tsdm39.net
-// @domain            bbs.vcb-s.com
-// @domain            *
+// @domain            *.*
+// @domain            *.*.*
+// @param             domain 域名,([http://]i.cat),([https://]i.dog)
 // @param             say 签到时说些什么,可用|分隔
 // ==/UserScript==
 

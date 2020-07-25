@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              natfrp
 // @namespace         https://soulsign.inu1255.cn/scripts/219
-// @version           1.2.7
+// @version           1.2.8
 // @author            sunzehui
 // @author            Miao-Mico
 // @loginURL          https://www.natfrp.com/user
@@ -45,7 +45,7 @@ let natfrp = {
 
                 return { code: 0, data: data_psi.data.message };
             } catch (TypeError) {
-                return { code: 1, data: "签到失败。无法匹配 csrf" };
+                return { code: 1, data: "签到失败。无 csrf 或 Captcha 验证!" };
             }
         }, // 推送网址签到信息
     }, // 钩子
@@ -58,7 +58,7 @@ exports.run = async function (param) {
     mmc = await mmc(natfrp, param);
 
     /* 返回签到信息 */
-    return await mmc.sign_in();
+    return await mmc.sign_in(true);
 };
 
 exports.check = async function (param) {

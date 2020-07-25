@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name              mmc
-// @namespace         https://soulsign.inu1255.cn/scripts/220
+// @namespace         https://soulsign.inu1255.cn/scripts/218
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/mmc
-// @version           1.2.7
+// @version           1.2.8
 // @author            Miao-Mico
 // @expire            2000000
-// @domain            *
+// @domain            *.*
+// @domain            *.*.*
 // ==/UserScript==
 
 (function () {
     const about = {
         author: "M-M", // 作者
-        version: "1.2.7", // 版本
+        version: "1.2.8", // 版本
         licence: "Apache-2.0 License", // 许可
         trademark: "❤️ mmc ❤️", // 标志
     }; // 关于
@@ -61,8 +62,8 @@
     }; // 关键字
 
     var configs = {
-        site_config: {}, // 网站配置
-        param_config: {}, // 参数配置
+        site: {}, // 网站配置
+        param: {}, // 参数配置
     }; // 传入的参数
 
     var pipes = []; // 管道
@@ -231,15 +232,11 @@
                 },
                 operation: {
                     pass: async function (index) {
-                        await system_log("assert_item_group()", 0, "pass(): if pass the assert");
-
                         return !(
                             match.regulation.undefined.box[index] + match.regulation.null.box[index]
                         );
                     },
                     alarm: async function (null_trigger = 0, callback = async function (match) {}) {
-                        await system_log("assert_item_group()", 0, "alarm()");
-
                         if (
                             parseInt(item_group.length) <= parseInt(match.regulation.undefined.code)
                         ) {
