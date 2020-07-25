@@ -1,22 +1,22 @@
 // ==UserScript==
-// @name              natfrp领流量
-// @namespace         https://soulsign.inu1255.cn/scripts/216
-// @version           1.2.5
+// @name              natfrp
+// @namespace         https://soulsign.inu1255.cn/scripts/219
+// @version           1.2.6
 // @author            sunzehui
 // @author            Miao-Mico
 // @loginURL          https://www.natfrp.com/user
-// @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/natfrp领流量
+// @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/natfrp
+// @grant             require
 // @expire            2000000
 // @domain            www.natfrp.com
-// @grant             require
 // ==/UserScript==
 
-var natfrp = {
-    core: "https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc.js", // 地址
-    domain: ["https://www.natfrp.com"],
-    dir: {
-        log_in: "/tunnel/sign", // 登录网址主机的
-        sign_in: "/ajax/sign", // 签到网址主机的
+let natfrp = {
+    core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.js", // 地址
+    domain: ["www.natfrp.com"],
+    path: {
+        log_in: ["tunnel/sign"], // 登录网址主机的
+        sign_in: ["ajax/sign"], // 签到网址主机的
     }, // 网址主机的目录
     keyword: {
         positive: ["退出登录", "管理面板"], // 应该有的
@@ -28,13 +28,13 @@ var natfrp = {
             let data_gli = await axios.get(site.url.get);
 
             /* 发布管道信息 */
-            await mmc.publish_pipe(0, data_gli.data);
+            await mmc.publish_pipe(site, data_gli.data);
 
             return { code: 0, data: data_gli };
         }, // 获取网址登录信息
         post_sign_in: async function (site, param) {
             /* 订阅管道信息 */
-            let data_psi = await mmc.subscribe_pipe(0);
+            let data_psi = await mmc.subscribe_pipe(site);
 
             try {
                 /* 匹配 csrf 信息 */
@@ -51,19 +51,19 @@ var natfrp = {
     }, // 钩子
 };
 
-var req, mmc;
+let mmc;
 
 exports.run = async function (param) {
-    req = await require(natfrp.core);
-    mmc = await req(natfrp, param);
+    mmc = await require(natfrp.core);
+    mmc = await mmc(natfrp, param);
 
     /* 返回签到信息 */
     return await mmc.sign_in();
 };
 
 exports.check = async function (param) {
-    req = await require(natfrp.core);
-    mmc = await req(natfrp, param);
+    mmc = await require(natfrp.core);
+    mmc = await mmc(natfrp, param);
 
     /* 返回是否在线 */
     return await mmc.check_online();

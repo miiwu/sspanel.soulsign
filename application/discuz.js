@@ -1,24 +1,27 @@
 // ==UserScript==
-// @name              飘云阁
-// @namespace         https://soulsign.inu1255.cn?account=Miao-Mico
-// @version           1.2.5
+// @name              discuz
+// @namespace         https://soulsign.inu1255.cn/scripts/221
+// @version           1.2.6
 // @author            honourjawy
 // @author            Miao-Mico
 // @loginURL          https://www.chinapyg.com
-// @updateURL
-// @expire            14400000
-// @domain            www.chinapyg.com
+// @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/discuz
 // @grant             require
+// @expire            2000000
+// @domain            discuz
+// @domain            www.chinapyg.com
+// @domain            www.tsdm39.net
+// @domain            bbs.vcb-s.com
+// @domain            *
 // @param             say 签到时说些什么,可用|分隔
 // ==/UserScript==
 
-var discuz_pyg = {
-    core: "https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc.js", // 核心地址
-    domain: ["https://www.chinapyg.com"], // 域名列表
-    dir: {
-        log_in:
-            "/plugin.php?id=dsu_paulsign:sign&576989e1&infloat=yes&handlekey=dsu_paulsign&inajax=1&ajaxtarget=fwin_content_dsu_paulsign", // 登录网址主机的
-        sign_in: "/plugin.php?id=dsu_paulsign:sign&operation=qiandao&infloat=1&sign_as=1&inajax=1", // 签到网址主机的
+let discuz = {
+    core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.js", // 核心地址
+    domain: ["www.chinapyg.com", "www.tsdm39.net", "bbs.vcb-s.com"], // 域名列表
+    path: {
+        log_in: ["plugin.php?id=dsu_paulsign:sign"], // 登录网址主机的
+        sign_in: ["plugin.php?id=dsu_paulsign:sign&operation=qiandao&infloat=1&inajax=1"], // 签到网址主机的
     }, // 网址主机的目录
     keyword: {
         positive: ["每日签到"], // 应该有的
@@ -30,14 +33,14 @@ var discuz_pyg = {
             let data_gli = await axios.get(site.url.get);
 
             /* 发布管道信息 */
-            await mmc.publish_pipe(0, data_gli.data);
+            await mmc.publish_pipe(site, data_gli.data);
 
             /* 返回 hook */
             return { code: 0, data: data_gli };
         }, // 获取网址登录信息
         post_sign_in: async function (site, param) {
             /* 订阅管道信息 */
-            let data_psi = await mmc.subscribe_pipe(0);
+            let data_psi = await mmc.subscribe_pipe(site);
 
             /* 检查是否已经签到 */
             if (/已经签到/.test(data_psi)) {
@@ -45,6 +48,7 @@ var discuz_pyg = {
             } else {
                 /* 匹配哈希 */
                 let formhash = /name="formhash" value="([^"]+)/.exec(data_psi);
+
                 if (!formhash) {
                     return { code: 1, data: "签到失败" };
                 }
@@ -67,19 +71,19 @@ var discuz_pyg = {
     }, // 钩子
 };
 
-var req, mmc;
+let mmc;
 
 exports.run = async function (param) {
-    mmc = await require(discuz_pyg.core);
-    mmc = await mmc(discuz_pyg, param);
+    mmc = await require(discuz.core);
+    mmc = await mmc(discuz, param);
 
     /* 返回签到信息 */
-    return await mmc.sign_in();
+    return await mmc.sign_in(true);
 };
 
 exports.check = async function (param) {
-    req = await require(discuz_pyg.core);
-    mmc = await req(discuz_pyg, param);
+    mmc = await require(discuz.core);
+    mmc = await mmc(discuz, param);
 
     /* 返回是否在线 */
     return await mmc.check_online();
