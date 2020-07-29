@@ -26,7 +26,7 @@
         ```javascript
         
         var sspanel = {
-            core: "https://soulsign.inu1255.cn/script/Miao-Mico/sspanel.mmc.js", // 地址
+            core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.js", // 地址
             domain: ["suying999.net", "https://xixicats.pw"], // 域名
             path: {
                 log_in: ["auth/login"], // 登录网址主机的
@@ -36,7 +36,19 @@
                 positive: ["首页", "我的"], // 应该有的
                 negative: ["忘记密码"], // 不应该有的
             }, // 关键词
-            hook: false, // 钩子
+            hook: {
+                get_log_in: async function (site, param) {
+                    /* 获取登录信息 */
+                    return { code: 0, data: await axios.get(site.url.get) };
+                }, // 获取网址登录信息
+                post_sign_in: async function (site, param) {
+                    /* 推送签到信息 */
+                    let data_psi = await axios.post(site.url.post);
+        
+                    /* 返回信息 */
+                    return { code: 0, data: data_psi.data.msg };
+                }, // 推送网址签到信息
+            }, // 钩子
         };
         
         ```
@@ -125,33 +137,20 @@
 - 1.0.0
   
   1. 发布脚本
-  
 - [1.1.0](https://github.com/Miao-Mico/sspanel.soulsign/tree/267f8a66125afc7ec8a8d6f565e4f4a08347b709)<sup>**stable**</sup>
-  
   1. 修复检测在线的问题
-  
 - 1.1.1
-  
   1. 支持配置检查在线的关键字
-  
 - 1.1.2
-  
   1. 支持配置多个域名
-  
 - 1.1.3
   1. 修改‘域名’文本框提示的文本
   2. 修改‘登录后应该有的关键字’文本框提示的文本
-  
 - 1.2.0
-  
   1. 形成模板
-  
 - 1.2.1
-  
   1. 支持 `hook`，可能能支持其他网站类型了
-  
 - 1.2.2
-  
   1. 支持在 `hook` 中引入 `param`
   2. 支持 `pipe`，`hook` 间相互通信
   3. 增加 `asserts`，支持适应不同参数列表，主要是有无 @param
@@ -159,38 +158,34 @@
   5. 增加 `debugs`
   6. 增加 `system_log()`，方便调试，`record_log()` 也会调用它
   7. 增加 `debug()`，支持根据等级输出
-
 - 1.2.3
-  
   1. 修改了 `site_config` 的格式
   2. 修复了更新 `domain` 时，`sites` 内索引不对的情况
   3. 改变部分 `var` 为 `let`，主要是函数内地局部变量
   4. 增加 `update_config()`<sup>dev</sup>，用来自动更新配置参数
-  
 - 1.2.4
   1. 增加 `飘云阁.js`
   2. 增加 `natfrp领流量.js`
   3. 证明可以 `hook` 为其他类型签到，决定签到方式
-
 - 1.2.5
   1. 增加 `about`
   2. 修改 `assert_type()`
   3. 修改 `view_log()` & `sign_in()`，支持结果全输出
   4. 增加更多 `system_log()`，在 `debug` 运行时记录日志
-
 - 1.2.6
   1. 修改了 `site_config` 的格式
   2. 支持多个 `path`，即支持一种签到方式下的多种网址
   3. 修改文件目录
-  
 - 1.2.7
-  
   1. 修复多个脚本调用不会刷新配置，取消缓存的特性
-  
 - 1.2.8
   1. 修复 `@domain` 配置问题
   2. 修改 `natfrp.js` 的提示信息，这个脚本可能暂时或永久失效，因为有了 `hCaptcha` 验证
   3. 修复部分变量名
+- 1.2.9
+  1. 移除 `mmc.js` 内部对 `sspanel.js` 的集成，`hook`
+  2. 配置 `sspanel.js` 的 `hook`
+  3. 修复当 `debugs.enable != true` 时，没有错误抛出
 
 ## 鸣谢
 

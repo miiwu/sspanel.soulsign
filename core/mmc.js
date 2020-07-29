@@ -2,7 +2,7 @@
 // @name              mmc
 // @namespace         https://soulsign.inu1255.cn/scripts/218
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/mmc
-// @version           1.2.8
+// @version           1.2.9
 // @author            Miao-Mico
 // @expire            2000000
 // @domain            *.*
@@ -12,7 +12,7 @@
 (function () {
     const about = {
         author: "M-M", // 作者
-        version: "1.2.8", // 版本
+        version: "1.2.9", // 版本
         licence: "Apache-2.0 License", // 许可
         trademark: "❤️ mmc ❤️", // 标志
     }; // 关于
@@ -42,17 +42,8 @@
     }; // 日志
 
     var hooks = {
-        get_log_in: async function (site, param) {
-            /* 获取登录信息 */
-            return { code: 0, data: await axios.get(site.url.get) };
-        }, // 获取网址登录信息
-        post_sign_in: async function (site, param) {
-            /* 推送签到信息 */
-            let data_psi = await axios.post(site.url.post);
-
-            /* 返回信息 */
-            return { code: 0, data: data_psi.data.msg };
-        }, // 推送网址签到信息
+        get_log_in: async function (site, param) {}, // 获取网址登录信息
+        post_sign_in: async function (site, param) {}, // 推送网址签到信息
     }; // 钩子
 
     var keywords = {
@@ -70,25 +61,23 @@
 
     async function system_log(object, code, message) {
         if (debugs.enable) {
+            let log = {
+                index: debugs.system.length,
+                object: object,
+                code: code,
+                message: message,
+            };
+
+            /* 打印系统日志 */
+            console.log(log);
+
             /* 压入系统日志 */
-            debugs.system.push({
-                index: debugs.system.length,
-                object: object,
-                code: code,
-                message: message,
-            });
+            debugs.system.push(log);
+        }
 
-            /* 抛出系统错误 */
-            if (/system/.test(object) && code) {
-                throw about.trademark + " ⁉️ " + message;
-            }
-
-            console.log({
-                index: debugs.system.length,
-                object: object,
-                code: code,
-                message: message,
-            });
+        /* 抛出系统错误 */
+        if (/system/.test(object) && code) {
+            throw about.trademark + " ⁉️ " + message;
         }
 
         return message;
@@ -345,6 +334,8 @@
                 [site_config.hook.get_log_in, site_config.hook.post_sign_in],
                 "hook",
                 async function (operation) {
+                    await operation.alarm(1);
+
                     asserts.hook.get_log_in = await operation.pass(0);
                     asserts.hook.post_sign_in = await operation.pass(1);
                 }
@@ -606,10 +597,12 @@
     } // 检查网址是否在线
 
     async function sign_in_site(site) {
+        let data_sis = { code: 0, data: "未执行，在此之前可能发生了错误" };
+
         /* 检查上一步是否成功，即本站点是否在线 */
         if (!logs.pool[site.index].code) {
             /* 推送签到信息 */
-            let data_sis = await method_site(
+            data_sis = await method_site(
                 site,
                 "post",
                 urls.path.sign_in,
@@ -617,6 +610,8 @@
                 "推送签到信息失败"
             );
         }
+
+        return data_sis;
     }
 
     async function check_online() {

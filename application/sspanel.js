@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              sspanel
 // @namespace         https://soulsign.inu1255.cn/scripts/222
-// @version           1.2.8
+// @version           1.2.9
 // @author            Miao-Mico
 // @loginURL          https://xixicats.pw
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel
@@ -26,7 +26,19 @@ let sspanel = {
         positive: ["我的", "节点"], // 应该有的
         negative: ["忘记密码"], // 不应该有的
     }, // 检查是否在线时的关键词
-    hook: false, // 钩子
+    hook: {
+        get_log_in: async function (site, param) {
+            /* 获取登录信息 */
+            return { code: 0, data: await axios.get(site.url.get) };
+        }, // 获取网址登录信息
+        post_sign_in: async function (site, param) {
+            /* 推送签到信息 */
+            let data_psi = await axios.post(site.url.post);
+
+            /* 返回信息 */
+            return { code: 0, data: data_psi.data.msg };
+        }, // 推送网址签到信息
+    }, // 钩子
 };
 
 let mmc;
