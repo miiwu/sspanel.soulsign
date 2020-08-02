@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              sspanel
 // @namespace         https://soulsign.inu1255.cn/scripts/222
-// @version           1.2.10
+// @version           1.2.11
 // @author            Miao-Mico
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel
 // @grant             require
@@ -12,11 +12,11 @@
 // @domain            *.*
 // @domain            *.*.*
 // @domain            *.*.*.*
-// @param             domain 域名,([http://]i.cat),([https://]i.dog)
+// @param             domain 域名,<i.cat>,<http(s)://i.dog>
 // ==/UserScript==
 
 let sspanel = {
-    core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.dev.js", // 地址
+    core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.js", // 地址
     domain: [], // 域名
     path: {
         log_in: ["auth/login"], // 登录网址主机的
@@ -24,14 +24,13 @@ let sspanel = {
     }, // 路径
     keyword: {
         online: ["我的", "节点"], // 在线的
-        signed: ["明日再来"], // 已经签到的
     }, // 检查是否在线时的关键词
     hook: {
         get_log_in: async function (site, param) {
             /* 获取登录信息 */
             return { code: 0, data: await axios.get(site.url.get) };
         }, // 获取网址登录信息
-        post_sign_in: async function (site, param) {
+        post_sign_in: async function (site, param, data) {
             /* 推送签到信息 */
             let data_psi = await axios.post(site.url.post);
 
