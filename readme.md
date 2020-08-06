@@ -31,19 +31,22 @@
 
             2. `.domain`<sup>*string[]*</sup>：域名
 
-               `i.cat`<sup>*https://*</sup>  和 `http(s)://i.dog` 均支持
+               `i.cat`<sup>*(https://)*</sup>  和 `http(s)://i.dog` 均支持
 
             3. `.path`<sup>*object*</sup>：路径
 
-               `i/cat`<sup>*/#*</sup>  和 `/i/dog` 均支持
+               `i/cat`<sup>*(/)*</sup>  和 `/i/dog` 均支持，且多个之间为 `逻辑或` 关系
 
                - `.log_in`<sup>*string[]*</sup>：登录网址的
                - `.sign_in`<sup>*string[]*</sup>：签到网址的
 
             4. `.keyword`<sup>*object*</sup>：关键字
+               
+               多个之间为 `逻辑或` 关系
+
                - `.online`<sup>*string[] -> regexp[]*</sup>：在线的
                - `.signed`<sup>*string[] -> regexp[]* + *optional*</sup>：已经签到的
-
+               
             5. `.hook`<sup>*object*</sup>：钩子
                - `.get_log_in`<sup>*async function (site, param){}*</sup>：获取网址登录信息的
                  1. `site`<sup>*object*</sup>：当前网站
@@ -53,21 +56,29 @@
                  2. `param`<sup>*object*</sup>：脚本头中定义的参数
                  3. `data`<sup>*string*</sup>：`.get_log_in` 中的返回值
                - `.notify_sign_in`<sup>*async function (array){}* + *optional*</sup>：通知网址签到信息的
-                 1. `array`<sup>*string[]*</sup>：`.keyword.signed` 中 **`最后一个`** 与 `.get_log_in` 中的返回值正则匹配后的数组
+                 1. `array`<sup>*string[]*</sup>：`.keyword.signed` 中与 `.get_log_in` 中的返回值 **`正则匹配成功`** 后的数组
 
-               注：
+            注：
 
-               - `site` 成员
+            - `site` 成员
 
-                 1. `scheme`<sup>*string*</sup>：协议
-                 2. `domain`<sup>*string*</sup>：域名
-                 3. `url`<sup>*object*</sup>：URL
-                    - `get`<sup>*string*</sup>：配合 `axios.get()` 使用
-                    - `post`<sup>*string*</sup>：配合 `axios.post()` 使用
+              1. `scheme`<sup>*string*</sup>：协议
+              2. `domain`<sup>*string*</sup>：域名
+              3. `url`<sup>*object*</sup>：URL
+                  - `get`<sup>*string*</sup>：配合 `axios.get()` 使用
+                  - `post`<sup>*string*</sup>：配合 `axios.post()` 使用
 
-               - `x -> y`
+            - `optional`
 
-                 表示 `x`、`y` 均 `支持`，且 `x` 会 `默认转换` 为  `y`
+              表示 `可选的`
+              
+            - `x -> y`
+
+              表示 `x`、`y` 均 `支持`，且 `x` 会 `默认转换` 为  `y`
+              
+            - `(x)`
+              
+              表示 `x` 为省略的部分
 
         - 例子
 
@@ -111,13 +122,25 @@
 
             1. `domain`：域名
 
-               - `i.cat`<sup>*https://*</sup>  和 `http(s)://i.dog` 均支持
+               格式同 `site_config.domain`
 
-            2. `keyword_online`：在线的关键字
+            2. `path_log_in`：登录路径
 
-               - `正则表达式`<sup>*/regexp/*</sup> 和 `字符`<sup>*abc*</sup> 均支持
+               格式同 `site_config.path`
 
-               注：均使用 `,` 分隔
+            3. `path_sign_in`：签到路径
+
+               格式同 `site_config.path`
+
+            4. `keyword_online`：在线的关键字
+
+               格式同 `site_config.keyword`
+
+            5. `keyword_signed`：已签到的关键字
+
+               格式同 `site_config.keyword`
+
+            注：均使用 `,` 分隔
 
         - 例子
 
@@ -127,7 +150,10 @@
             // ...
             // @grant             require
             // @param             domain 域名,<i.cat>,<http(s)://i.dog>
-            // @param             keyword_online 在线的关键字,我的,首页
+            // @param             path_log_in 登录路径,<i/cat>,</i/dog>
+            // @param             path_sign_in 签到路径,<i/cat>,</i/dog>
+            // @param             keyword_online 在线关键字,</cat/>,<dog>
+            // @param             keyword_signed 已签到关键字,</cat/>,<dog>
             // ...
             // ==/UserScript==
             
@@ -139,31 +165,31 @@
 
 - **`res`** 成员
 
-    1. `res.about`
+    1. `res.about`：关于
 
         - 返回 关于
 
-    2. `res.debug(level = 0)`
+    2. `res.debug(level = 0)`：调试信息
 
         - 返回 根据 `level` 决定的部分或全部内部变量值
 
-    3. `res.record_log(site, code, message)`
+    3. `res.record_log(site, code, message)`：记录日志
 
         - 返回 参数 `message`
 
-    4. `res.update_config(site_config, param_config)`<sup>dev</sup>
+    4. `res.update_config(site_config, param_config)`<sup>dev</sup>：更新配置
 
         - 无
 
-    5. `res.publish_pipe(site, message)`
+    5. `res.publish_pipe(site, message)`：发布管道信息
 
         - 返回  `message`
 
-    6. `res.subscribe_pipe(site)`
+    6. `res.subscribe_pipe(site)`：订阅管道信息
 
-        - 返回  `res.publish_pipe(which, message)` 中的 `message`
+        - 返回  `res.publish_pipe(site, message)` 中的 `message`
 
-    7. `res.sign_in(full_log = false)`
+    7. `res.sign_in(full_log = false)`：登录
 
         - full_log = true
           - 成功：❤️ mmc ❤️ < [ ✔ 网站: 提示语] >
@@ -172,9 +198,9 @@
           - 成功：❤️ mmc ❤️ 
           - 失败：❤️ mmc ❤️ < [ ❗ 网站: 问题] >
 
-        注：<...>，意为里面的内容可能会是重复的多个
+        注：<...>，意为里面的内容是一个单元
 
-    8. `res.check_online()`
+    8. `res.check_online()`：检测是否在线
 
         - 成功：`true`
         - 失败：`false`
@@ -192,8 +218,8 @@
 - [x] 管理多个站点，需配置 `@param domain`  或 `.domain`
 - [x] 管理检测关键词，需配置 `@param keyword_xxx`  或 `.keyword.xxx`
 - [x] 分离核心脚本，应用脚本轻量化
-- [x] 多种网站签到方式，需配置 `hook` 
-- [x] 每种网站签到方式可以自动匹配多个不同网址，需配置 `path`
+- [x] 多种网站签到方式，需配置 `.hook.xxx` 
+- [x] 每种网站签到方式可以自动匹配多个不同网址，需配置 `@param path_xxx` 或 `.path.xxx`
 - [x] 每次调用脚本均刷新配置
 - [x] 多个网站域名设置，提示 `domain配置不正确`，暂采用 `*.*` & `*.*.*` & `*.*.*.*`
 - [x] 自定义 `已签到` 通知文字，需配置 `.hook.notify_sign_in` 和 `.keyword.signed` 为 `均有效`
@@ -292,6 +318,14 @@
   5. 修复 `method_site()` 中多个 `path` 不自动轮转的问题
   6. 修复 `nexusphp.js`
   7. 修改 `match_keyword_list()` 为 `match_keyword()`
+- 1.2.12
+  1. 增加 `discuz.dc` & `discuz.k`
+  2. 支持 `param_config.path_xxx` & `param_config.keyword_signed`
+  3. 重写 `config_path()`，用到了 `operate_table()`
+  4. 默认 `param_config` 可选项均加入应用脚本
+  5. 修复 `param_config.keyword_signed` 读取问题
+  6. 修复 `method_site()` 中多个 `path` 自动更新的规则问题，梅开二度？
+  7. 修复 `notify_sign_in()` 的参数问题
 
 ## 鸣谢
 

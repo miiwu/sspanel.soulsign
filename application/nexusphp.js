@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              nexusphp
 // @namespace         https://soulsign.inu1255.cn/scripts/226
-// @version           1.2.11
+// @version           1.2.12
 // @author            Mayu-Melville
 // @author            Miao-Mico
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/nexusphp
@@ -13,14 +13,18 @@
 // @domain            *.*.*
 // @domain            *.*.*.*
 // @param             domain 域名,<i.cat>,<http(s)://i.dog>
+// @param             path_log_in 登录路径,<i/cat>,</i/dog>
+// @param             path_sign_in 签到路径,<i/cat>,</i/dog>
+// @param             keyword_online 在线关键字,</cat/>,<dog>
+// @param             keyword_signed 已签到关键字,</cat/>,<dog>
 // ==/UserScript==
 
 let nexusphp = {
-    core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.js", // 核心地址
+    core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.js", // 地址
     domain: [], // 域名
     path: {
-        log_in: ["index.php"], // 登录网址主机的
-        sign_in: ["attendance.php"], // 签到网址主机的
+        log_in: ["index.php"], // 登录的
+        sign_in: ["attendance.php"], // 签到的
     }, // 网址主机的目录
     keyword: {
         online: [/欢迎|歡迎/], // 在线的

@@ -16,7 +16,7 @@
 
 ### 🧐 为什么 🧐
 
-鉴于更新会把脚本整体替换掉，而有些人可能并不需要源脚本中的某些网站，所以把域名放到了 `配置参数` 中
+鉴于更新会把脚本整体替换掉，而有些人可能并不需要源脚本中的某些网站，所以把 `域名` 放到了 `配置参数` 中
 
 ### 🧂 怎么做 🧂
 
@@ -30,6 +30,10 @@
 
 ## 网站类型
 
+<div align="center">
+	<h3>📢 无法处理 🩺 机器人行为检测 🩺 📢</h3>
+</div>
+
 - ### sspanel
 
   普适 `SSPANEL`<sup><font color=gray>Powered by </font><font color=#67a1f3>SSPANEL</font></sup> 搭建的网站
@@ -39,11 +43,11 @@
   - [XIXI🐱](https://xixicats.pw)
   - [速🦅666](https://suying999.net)
   - [泥马☁](https://cloud.nima.ma)
-  - ...
+  - 更多，期待你的发现...
 
 - ### discuz
 
-  普适 `Discuz!`<sup><font color=gray>Powered by </font><font color=black>**[Discuz!](https://www.discuz.net/)**</font></sup> 搭建的网站
+  普适 `Discuz!`<sup><font color=gray>Powered by </font><font color=black>**[Discuz!](https://www.discuz.net/)**</font></sup> 搭建、使用 `DSU` <sup>【DSU】每日签到 + http(s)://\*/\*?id=dsu_paulsign\*</sup> 插件的网站
 
   #### 兼容的<sup>`2020/07/31`</sup>
   - [飘云阁](https://www.chinapyg.com)
@@ -52,7 +56,35 @@
   - [骑砍中文站](https://bbs.mountblade.com.cn)
   - [不移之火](https://www.byzhihuo.com)
   - [VR 开发网](https://www.52vr.com)
-  - ...
+  - 更多，期待你的发现...
+
+- ### discuz.dc
+
+  普适 `Discuz!`<sup><font color=gray>Powered by </font><font color=black>**[Discuz!](https://www.discuz.net/)**</font></sup> 搭建、使用 `DC` <sup>【DC】每日签到 + http(s)://\*/\*?id=dc_signin\*</sup> 插件的网站
+
+  #### 兼容的<sup>`2020/08/07`</sup>
+
+  - [石炉中文论坛](http://stonehearth.cn)
+  - ~~[我的世界论坛 - MCPlugin](https://bbs.mcplugin.cn)~~<sup>*有时会出现验证码*</sup>
+  - [虚幻独立游戏开发](https://www.gamesoho.net)
+  - [醉游汉化论坛](http://bbs.ojiang.net)
+  - 更多，期待你的发现...
+
+- ### discuz.k
+
+  普适 `Discuz!`<sup><font color=gray>Powered by </font><font color=black>**[Discuz!](https://www.discuz.net/)**</font></sup> 搭建、使用 `K` <sup>http(s)://\*/\*?id=k_misign\*</sup> 插件的网站
+
+  #### 兼容的<sup>`2020/08/07`</sup>
+
+  - [鱼 C 论坛](https://fishc.com.cn)
+  - [Hao4K](https://www.hao4k.cn)
+  - [模吧](https://www.moz8.com)
+  - [SketchUp 吧](https://www.sketchupbar.com)
+  - [猫咔噗](https://www.maokapu.com)
+  - [猫咪音乐网](https://www.maomicd.com)
+  - [云大陆](https://www.vrarz.com)
+  - [QT 开源社区](https://www.qter.org)
+  - 更多，期待你的发现...
 
 - ### nexusphp
 
@@ -68,7 +100,7 @@
   - [壹 PT 吧](https://1ptba.com)
   - [HDD](https://hddisk.life)
   - [HD Dolby](https://www.hddolby.com/)
-  - ...
+  - 更多，期待你的发现...
   
 - ### natfrp
 

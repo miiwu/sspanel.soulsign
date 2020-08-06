@@ -2,7 +2,7 @@
 // @name              mmc
 // @namespace         https://soulsign.inu1255.cn/scripts/218
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/mmc
-// @version           1.2.11
+// @version           1.2.12
 // @author            Miao-Mico
 // @expire            2000000
 // @domain            *.*
@@ -13,7 +13,7 @@
 (function () {
     const about = {
         author: "M-M", // 作者
-        version: "1.2.11", // 版本
+        version: "1.2.12", // 版本
         licence: "Apache-2.0 License", // 许可
         trademark: "❤️ mmc ❤️", // 标志
     }; // 关于
@@ -29,8 +29,8 @@
 
     var asserts = {
         domain: { site: false, param: false },
-        path: { site: {} },
-        keyword: { site: {}, param: false },
+        path: { site: {}, param: {} },
+        keyword: { site: {}, param: {} },
         hook: {},
     }; // 断言
 
@@ -295,18 +295,30 @@
                     pass: async function (index) {
                         return !(match.regulation.undefined.box[index] + match.regulation.null.box[index]);
                     },
-                    alarm: async function (null_trigger = 0, callback = async function (match) {}) {
-                        if (parseInt(item_group.length) <= parseInt(match.regulation.undefined.code)) {
+                    alarm: async function (table = []) {
+                        if (item_group.length <= match.regulation.undefined.code) {
                             await system_log(system, 1, `${message} 缺失`);
-                        } else if (
-                            parseInt(null_trigger ? null_trigger : item_group.length) <=
-                            parseInt(match.regulation.null.code)
-                        ) {
+                        } else if (item_group.length <= match.regulation.null.code) {
                             await system_log(system, 1, `${message} 为空`);
                         }
 
-                        await system_log("alarm()", 0, callback);
-                        await callback(match, message);
+                        await system_log("alarm()", 0, table);
+
+                        await operate_table(table, async function (item) {
+                            let result_alarm = await operate_table(item.box, async function (itm) {
+                                return Number(eval(`match.regulation.${itm}`));
+                            });
+
+                            await system_log("operate_table()", 0, result_alarm);
+
+                            for (let index = 1; index < result_alarm.length; index++) {
+                                result_alarm[0] = result_alarm[index] + result_alarm[0];
+                            }
+
+                            if (eval(`${item.trigger} < ${result_alarm[0]}`)) {
+                                await system_log("system", 1, `${message}.${item.message}`);
+                            }
+                        });
                     },
                 },
             }; // 匹配数
@@ -349,29 +361,45 @@
             });
 
             /* 断言路径 */
-            await assert_item_group([site_config.path.log_in, site_config.path.sign_in], "path", async function (
-                operation
-            ) {
-                await operation.alarm(1);
+            await assert_item_group(
+                [
+                    site_config.path.log_in,
+                    site_config.path.sign_in,
+                    param_config.path_log_in,
+                    param_config.path_sign_in,
+                ],
+                "path",
+                async function (operation) {
+                    await operation.alarm([
+                        { box: ["null.box[0]", "null.box[2]"], trigger: 1, message: `log_in 为空` },
+                        { box: ["null.box[1]", "null.box[3]"], trigger: 1, message: `sign_in 为空` },
+                    ]);
 
-                asserts.path.site.log_in = await operation.pass(0);
-                asserts.path.site.sign_in = await operation.pass(1);
-            });
+                    asserts.path.site.log_in = await operation.pass(0);
+                    asserts.path.site.sign_in = await operation.pass(1);
+                    asserts.path.param.log_in = await operation.pass(2);
+                    asserts.path.param.sign_in = await operation.pass(3);
+                }
+            );
 
             /* 断言关键字 */
             await assert_item_group(
-                [site_config.keyword.online, site_config.keyword.signed, param_config.keyword_online],
+                [
+                    site_config.keyword.online,
+                    site_config.keyword.signed,
+                    param_config.keyword_online,
+                    param_config.keyword_signed,
+                ],
                 "keyword",
                 async function (operation) {
-                    await operation.alarm(3, async function (match, message) {
-                        if (match.regulation.null.box[0]) {
-                            await system_log("system", 1, `${message} 为空`);
-                        }
-                    });
+                    await operation.alarm([
+                        { box: ["null.box[0]", "null.box[2]"], trigger: 1, message: `online 为空` },
+                    ]);
 
                     asserts.keyword.site.online = await operation.pass(0);
                     asserts.keyword.site.signed = await operation.pass(1);
-                    asserts.keyword.param = await operation.pass(2);
+                    asserts.keyword.param.online = await operation.pass(2);
+                    asserts.keyword.param.signed = await operation.pass(3);
                 }
             );
 
@@ -380,11 +408,10 @@
                 [site_config.hook.get_log_in, site_config.hook.post_sign_in, site_config.hook.notify_sign_in],
                 "hook",
                 async function (operation) {
-                    await operation.alarm(2, async function (match, message) {
-                        if (match.regulation.null.box[0] || match.regulation.null.box[1]) {
-                            await system_log("system", 1, `${message} 为空`);
-                        }
-                    });
+                    await operation.alarm([
+                        { box: ["null.box[0]"], trigger: 0, message: `get_log_in 为空` },
+                        { box: ["null.box[1]"], trigger: 0, message: `post_sign_in 为空` },
+                    ]);
 
                     asserts.hook.get_log_in = await operation.pass(0);
                     asserts.hook.post_sign_in = await operation.pass(1);
@@ -460,11 +487,7 @@
         /* 配置参数 */
         await operate_item(
             hook.index,
-            [
-                ["site", "configs.param"],
-                ["site", "configs.param", "logs.pool[site.index].persistence"],
-                ["arguments[0]"],
-            ],
+            [["site", "configs.param"], ["site", "configs.param", "logs.pool[site.index].persistence"], []],
             async function (item) {
                 for (let index = 0; index < item.length; index++) {
                     eval(`argument.push(${item[index]})`);
@@ -516,46 +539,51 @@
                 urls.site.push(site_cd);
                 await system_log("config_domain()", 0, site_cd);
             }
-
-            await system_log("config_domain()", 0, domain);
         } // 配置网站
 
-        async function config_path(path) {
-            let path_local = [],
-                path_regexp = "";
+        async function config_path(path = { type: "", config: [] }) {
+            for (let priority = 0; priority < path.config.length; priority++) {
+                try {
+                    let path_cp = { priority: priority, data: path.config[priority].match(/(\/*)([^# ]*)/)[2] };
 
-            for (let priority = 0; priority < path.length; priority++) {
-                let match_cp = path[priority].match(/(\/*)([^# ]*)/);
-                await system_log("config_path()", 0, match_cp);
-                path_regexp = match_cp[2];
-
-                let path_cp = { priority: priority, data: path_regexp };
-
-                path_local.push(path_cp);
-                await system_log("config_path()", 0, path_cp);
+                    eval(`urls.path.${path.type}`).push(await system_log("config_path()", 0, path_cp));
+                } catch (exception) {
+                    throw exception;
+                }
             }
+        } // 配置路径
 
-            return await system_log("config_path()", 0, path_local);
-        }
-
-        /* 清空网址 */
+        /* 清空 urls */
         urls.site.length = 0;
         urls.path.log_in.length = 0;
         urls.path.sign_in.length = 0;
 
         /* 配置路径 */
-        urls.path.log_in = await config_path(configs.site.path.log_in);
-        urls.path.sign_in = await config_path(configs.site.path.sign_in);
-
         await operate_table(
             [
-                { path: "log_in", assert: "site", config: "site.domain" },
-                { path: "sign_in", assert: "param", config: "param.domain.split(separator)" },
+                { assert: "site.log_in", type: "log_in", config: "site.path.log_in" },
+                { assert: "site.sign_in", type: "sign_in", config: "site.path.sign_in" },
+                { assert: "param.log_in", type: "log_in", config: "param.path_log_in.split(separator)" },
+                { assert: "param.sign_in", type: "sign_in", config: "param.path_sign_in.split(separator)" },
+            ],
+            async function (item) {
+                if (eval(`asserts.path.${item.assert}`)) {
+                    await config_path({ type: item.type, config: eval(`configs.${item.config}`) });
+                    await system_log("config_url()", 0, `config path.${item.assert}`);
+                }
+            }
+        );
+
+        /* 配置网站 */
+        await operate_table(
+            [
+                { assert: "site", type: "log_in", config: "site.domain" },
+                { assert: "param", type: "sign_in", config: "param.domain.split(separator)" },
             ],
             async function (item) {
                 if (eval(`asserts.domain.${item.assert}`)) {
                     await config_domain(eval(`configs.${item.config}`));
-                    await system_log("config_url()", 0, `config ${item.path}`);
+                    await system_log("config_url()", 0, `config ${item.type}`);
                 }
             }
         );
@@ -570,7 +598,11 @@
     async function config_keyword(separator = ",") {
         async function config_type(type, keyword_list) {
             for (let index = 0; index < keyword_list.length; index++) {
-                type.push(keyword_list[index]);
+                try {
+                    type.push(RegExp(keyword_list[index].match(/\/(.*)\//)[1]));
+                } catch (exception) {
+                    type.push(keyword_list[index]);
+                }
             }
         }
 
@@ -584,7 +616,8 @@
             [
                 { keyword: "online", assert: "site.online", config: "site.keyword.online" },
                 { keyword: "signed", assert: "site.signed", config: "site.keyword.signed" },
-                { keyword: "online", assert: "param", config: "param.keyword_online" },
+                { keyword: "online", assert: "param.online", config: "param.keyword_online.split(separator)" },
+                { keyword: "signed", assert: "param.signed", config: "param.keyword_signed.split(separator)" },
             ],
             async function (item) {
                 if (eval(`asserts.keyword.${item.assert}`)) {
@@ -661,31 +694,33 @@
         /* 推送签到信息 */
         let data_ms = { code: true, data: "" },
             boolean_ms = false,
-            next = false;
+            update = false;
 
         for (let cnt = 0; cnt < path.length; cnt++) {
             try {
-                await update_url(site, method, next);
-                next = false;
-                data_ms = await system_log("method_site()", 0, await handle_hook(hook, site));
+                await update_url(site, method, update);
+
+                data_ms = await handle_hook(hook, site);
+                await system_log("method_site()", 0, `hook? ${data_ms.code}`);
 
                 await record_log(site, data_ms.code, data_ms.data, true);
-                boolean_ms = await system_log("method_site()", 0, await match(site, data_ms));
+                boolean_ms = await match(site, data_ms);
+                await system_log("method_site()", 0, `match? ${boolean_ms}`);
 
-                if (!data_ms.code || !boolean_ms) {
-                    next = true;
-                    continue;
-                } else {
-                    break;
-                }
+                update = data_ms.code || boolean_ms;
             } catch (exception) {
                 if (/TypeError/.test(exception)) {
                     await record_log(site, 1, message);
 
-                    next = true;
-                    continue;
+                    update = true;
                 } else {
                     throw exception;
+                }
+            } finally {
+                await system_log("method_site()", 0, `update? ${update}`);
+
+                if (!update) {
+                    break;
                 }
             }
         } // 选择 path
@@ -693,55 +728,34 @@
         return await system_log("method_site()", 0, boolean_ms);
     }
 
-    async function match_keyword(
-        site,
-        data,
-        keyword,
-        property,
-        message,
-        notify = async function () {
-            return { code: 1 };
-        }
-    ) {
-        let string_mkl = "",
-            mismatch_mkl = false,
-            mismatches_mkl = 0;
+    async function match_keyword(site, data, keyword, property, message, notify = async function () {}) {
+        let matches_mkl = keyword.length;
 
         for (let index = 0; index < keyword.length; index++) {
-            try {
-                /* 匹配正则表达式 */
-                let array_mkl = data.match(RegExp(keyword[index]));
-                string_mkl = array_mkl[0];
-                mismatch_mkl = false;
+            let array_mkl = data.match(RegExp(keyword[index])),
+                match_mkl = Boolean(array_mkl);
 
+            await system_log("match_keyword()", 0, `${property}.${keyword[index]} match? ${match_mkl}`);
+
+            if (match_mkl) {
                 /* 个性化通知文字 */
-                if (asserts.hook.notify_sign_in) {
-                    let notify_package = await system_log("match_keyword()", 0, await notify(array_mkl));
-                    if (!notify_package.code) {
-                        message[0] = notify_package.data;
-                    }
-                }
-            } catch (exception) {
-                if (/TypeError/.test(exception)) {
-                    keywords.mismatch.push({
-                        domain: site.domain,
-                        property: property,
-                        keyword: keyword[index],
-                    });
+                await system_log("match_keyword()", 0, await notify(array_mkl, message));
 
-                    string_mkl = keyword[index];
-                    mismatch_mkl = true;
-                    mismatches_mkl++;
-                } else {
-                    throw exception;
-                }
+                break;
+            } else {
+                /* 收集不匹配信息 */
+                keywords.mismatch.push({
+                    domain: site.domain,
+                    property: property,
+                    keyword: keyword[index],
+                });
+
+                matches_mkl--;
             }
-
-            await system_log("match_keyword()", 0, `${property}.${string_mkl} match? ${!mismatch_mkl}`);
         }
 
-        await record_log(site, mismatches_mkl, message[Number(!!mismatches_mkl)]);
-        return await system_log("match_keyword()", 0, mismatches_mkl);
+        await record_log(site, !matches_mkl, message[Number(!matches_mkl)]);
+        return await system_log("match_keyword()", 0, !matches_mkl);
     }
 
     async function check_online_site(site) {
@@ -768,7 +782,7 @@
 
         /* 检查上一步是否成功，即本站点是否在线 */
         if (!logs.pool[site.index].code) {
-            if (asserts.keyword.site.signed) {
+            if (keywords.signed.length) {
                 let persistence_sis = await system_log("sign_in_site()", 0, await persistence_log(site));
 
                 boolean_sis = !(await match_keyword(
@@ -777,8 +791,12 @@
                     keywords.signed,
                     "signed",
                     ["已签到", "未签到"],
-                    async function (array) {
-                        return await handle_hook(hooks.notify_sign_in, site, array);
+                    async function (array, message) {
+                        let data_mk = await handle_hook(hooks.notify_sign_in, site, [array]);
+
+                        if (!data_mk.code) {
+                            message[0] = data_mk.data;
+                        }
                     }
                 ));
             } // 检查是否已签到

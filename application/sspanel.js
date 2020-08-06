@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              sspanel
 // @namespace         https://soulsign.inu1255.cn/scripts/222
-// @version           1.2.11
+// @version           1.2.12
 // @author            Miao-Mico
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel
 // @grant             require
@@ -13,17 +13,21 @@
 // @domain            *.*.*
 // @domain            *.*.*.*
 // @param             domain 域名,<i.cat>,<http(s)://i.dog>
+// @param             path_log_in 登录路径,<i/cat>,</i/dog>
+// @param             path_sign_in 签到路径,<i/cat>,</i/dog>
+// @param             keyword_online 在线关键字,</cat/>,<dog>
+// @param             keyword_signed 已签到关键字,</cat/>,<dog>
 // ==/UserScript==
 
 let sspanel = {
     core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.js", // 地址
     domain: [], // 域名
     path: {
-        log_in: ["auth/login"], // 登录网址主机的
-        sign_in: ["user/checkin"], // 签到网址主机的
+        log_in: ["auth/login"], // 登录的
+        sign_in: ["user/checkin"], // 签到的
     }, // 路径
     keyword: {
-        online: ["我的", "节点"], // 在线的
+        online: [/我的/, /节点/], // 在线的
     }, // 检查是否在线时的关键词
     hook: {
         get_log_in: async function (site, param) {
