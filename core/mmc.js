@@ -2,7 +2,7 @@
 // @name              mmc
 // @namespace         https://soulsign.inu1255.cn/scripts/218
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/mmc
-// @version           1.2.12
+// @version           1.2.13
 // @author            Miao-Mico
 // @expire            2000000
 // @domain            *.*
@@ -13,7 +13,7 @@
 (function () {
     const about = {
         author: "M-M", // 作者
-        version: "1.2.12", // 版本
+        version: "1.2.13", // 版本
         licence: "Apache-2.0 License", // 许可
         trademark: "❤️ mmc ❤️", // 标志
     }; // 关于
@@ -785,20 +785,22 @@
             if (keywords.signed.length) {
                 let persistence_sis = await system_log("sign_in_site()", 0, await persistence_log(site));
 
-                boolean_sis = !(await match_keyword(
-                    site,
-                    persistence_sis.data,
-                    keywords.signed,
-                    "signed",
-                    ["已签到", "未签到"],
-                    async function (array, message) {
-                        let data_mk = await handle_hook(hooks.notify_sign_in, site, [array]);
+                if (!!persistence_sis) {
+                    boolean_sis = !(await match_keyword(
+                        site,
+                        persistence_sis.data,
+                        keywords.signed,
+                        "signed",
+                        ["已签到", "未签到"],
+                        async function (array, message) {
+                            let data_mk = await handle_hook(hooks.notify_sign_in, site, [array]);
 
-                        if (!data_mk.code) {
-                            message[0] = data_mk.data;
+                            if (!data_mk.code) {
+                                message[0] = data_mk.data;
+                            }
                         }
-                    }
-                ));
+                    ));
+                }
             } // 检查是否已签到
 
             /* 判断是否已经签到 */

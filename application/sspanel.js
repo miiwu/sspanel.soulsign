@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              sspanel
 // @namespace         https://soulsign.inu1255.cn/scripts/222
-// @version           1.2.12
+// @version           1.2.13
 // @author            Miao-Mico
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/sspanel
 // @grant             require

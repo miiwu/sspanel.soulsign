@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              discuz.k
 // @namespace         https://soulsign.inu1255.cn/scripts/229
-// @version           1.2.12
+// @version           1.2.13
 // @author            ViCrack
 // @author            Miao-Mico
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/discuz.k

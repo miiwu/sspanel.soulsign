@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              discuz
 // @namespace         https://soulsign.inu1255.cn/scripts/221
-// @version           1.2.12
+// @version           1.2.13
 // @author            honourjawy
 // @author            Miao-Mico
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/discuz
