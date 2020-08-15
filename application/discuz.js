@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              discuz
 // @namespace         https://soulsign.inu1255.cn/scripts/221
-// @version           1.2.13
+// @version           1.2.14
 // @author            honourjawy
 // @author            Miao-Mico
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/discuz
@@ -17,18 +17,19 @@
 // @param             path_sign_in 签到路径,<i/cat>,</i/dog>
 // @param             keyword_online 在线关键字,</cat/>,<dog>
 // @param             keyword_signed 已签到关键字,</cat/>,<dog>
+// @param             keyword_filter 过滤正常消息关键字,</cat/>,<dog>
 // ==/UserScript==
 
 let discuz_dsu = {
-    core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.js", // 地址
-    domain: [], // 域名
+    core: "https://cdn.jsdelivr.net/gh/miiwu/sspanel.soulsign@dev/core/mmc.js", // 地址
     path: {
         log_in: ["plugin.php?id=dsu_paulsign:sign"], // 登录的
         sign_in: ["plugin.php?id=dsu_paulsign:sign&operation=qiandao&infloat=1&inajax=1"], // 签到的
     }, // 网址主机的目录
     keyword: {
-        online: [/签到排行榜/], // 在线的
+        online: [/签到排行榜/, /设置马甲/], // 在线的
         signed: [/您今天已经签到过了或者签到时间还未开始/], // 已经签到的
+        filter: [/已/, /成功/], // 过滤正常消息的
     }, // 检查是否在线时的关键词
     hook: {
         get_log_in: async function (site, param) {
@@ -38,7 +39,10 @@ let discuz_dsu = {
         post_sign_in: async function (site, param, data) {
             try {
                 /* 配置推送信息 */
-                let formhash = /name="formhash" value="([^"]+)/.exec(data.data)[1];
+                let formhash = "";
+                let table_fh = [/formhash=([^&"]+)/, /name="formhash" value="([^"]+)/];
+                for (let item of table_fh) if (!!(formhash = data.data.match(item))) break;
+                formhash = formhash[1];
                 let ss = (param.say || "开心").split("|");
                 let say = encodeURIComponent(ss[Math.floor(Math.random() * ss.length)]);
 

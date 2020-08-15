@@ -20,7 +20,13 @@
 
 ### 🧂 怎么做 🧂
 
-请右键复制链接后，粘贴到 `配置参数`<sup> `小齿轮`</sup> 中的 `域名` 选项，多个分别用 **`,`** <sup>`英文字符` </sup> 隔开
+`配置参数`<sup> `小齿轮`</sup> 中的所有选项，如需多个，请分别用 **`,`** <sup>`英文字符` </sup> 隔开
+
+请右键复制链接后，粘贴到 `配置参数`<sup> `小齿轮`</sup> 中的 `域名` 选项
+
+- 自定义的网站
+
+  如果你发现 `签到消息` 明明是正确的，却显示错误，请配置 `配置参数` 中的 `过滤正常消息关键字` 选项
 
 ### 😝 我要说 😝
 
@@ -49,13 +55,15 @@
 
   普适 `Discuz!`<sup><font color=gray>Powered by </font><font color=black>**[Discuz!](https://www.discuz.net/)**</font></sup> 搭建、使用 `DSU` <sup>【DSU】每日签到 + http(s)://\*/\*?id=dsu_paulsign\*</sup> 插件的网站
 
-  #### 兼容的<sup>`2020/07/31`</sup>
+  #### 兼容的<sup>`2020/08/18`</sup>
   - [飘云阁](https://www.chinapyg.com)
   - [天使动漫](https://www.tsdm39.net)
   - [VCB-S 论坛](https://bbs.vcb-s.com)
   - [骑砍中文站](https://bbs.mountblade.com.cn)
   - [不移之火](https://www.byzhihuo.com)
   - [VR 开发网](https://www.52vr.com)
+  - [经管之家](https://bbs.pinggu.org)
+  - [破日编程经验分享论坛](http://www.pr61.com)
   - 更多，期待你的发现...
 
 - ### discuz.dc
@@ -65,16 +73,15 @@
   #### 兼容的<sup>`2020/08/07`</sup>
 
   - [石炉中文论坛](http://stonehearth.cn)
-  - ~~[我的世界论坛 - MCPlugin](https://bbs.mcplugin.cn)~~<sup>*有时会出现验证码*</sup>
   - [虚幻独立游戏开发](https://www.gamesoho.net)
   - [醉游汉化论坛](http://bbs.ojiang.net)
   - 更多，期待你的发现...
-
+  
 - ### discuz.k
 
   普适 `Discuz!`<sup><font color=gray>Powered by </font><font color=black>**[Discuz!](https://www.discuz.net/)**</font></sup> 搭建、使用 `K` <sup>http(s)://\*/\*?id=k_misign\*</sup> 插件的网站
 
-  #### 兼容的<sup>`2020/08/07`</sup>
+  #### 兼容的<sup>`2020/08/18`</sup>
 
   - [鱼 C 论坛](https://fishc.com.cn)
   - [Hao4K](https://www.hao4k.cn)
@@ -84,6 +91,7 @@
   - [猫咪音乐网](https://www.maomicd.com)
   - [云大陆](https://www.vrarz.com)
   - [QT 开源社区](https://www.qter.org)
+  - [迅维网](https://www.chinafix.com)
   - 更多，期待你的发现...
 
 - ### nexusphp

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              nexusphp
 // @namespace         https://soulsign.inu1255.cn/scripts/226
-// @version           1.2.13
+// @version           1.2.14
 // @author            Mayu-Melville
 // @author            Miao-Mico
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/nexusphp
@@ -17,6 +17,7 @@
 // @param             path_sign_in 签到路径,<i/cat>,</i/dog>
 // @param             keyword_online 在线关键字,</cat/>,<dog>
 // @param             keyword_signed 已签到关键字,</cat/>,<dog>
+// @param             keyword_filter 过滤正常消息关键字,</cat/>,<dog>
 // ==/UserScript==
 
 let nexusphp = {
@@ -29,6 +30,7 @@ let nexusphp = {
     keyword: {
         online: [/欢迎|歡迎/], // 在线的
         signed: [/已经签到|已經簽到/], // 已经签到的
+        filter: [""], // 过滤正常消息的
     }, // 检查是否在线时的关键词
     hook: {
         get_log_in: async function (site, param) {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              discuz.k
 // @namespace         https://soulsign.inu1255.cn/scripts/229
-// @version           1.2.13
+// @version           1.2.14
 // @author            ViCrack
 // @author            Miao-Mico
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/discuz.k
@@ -16,18 +16,19 @@
 // @param             path_sign_in 签到路径,<i/cat>,</i/dog>
 // @param             keyword_online 在线关键字,</cat/>,<dog>
 // @param             keyword_signed 已签到关键字,</cat/>,<dog>
+// @param             keyword_filter 过滤正常消息关键字,</cat/>,<dog>
 // ==/UserScript==
 
 let discuz_k = {
-    core: "https://soulsign.inu1255.cn/script/Miao-Mico/mmc.js", // 地址
-    domain: [], // 域名
+    core: "https://cdn.jsdelivr.net/gh/miiwu/sspanel.soulsign@dev/core/mmc.js", // 地址
     path: {
         log_in: ["plugin.php?id=k_misign:sign"], // 登录的
-        sign_in: [""], // 签到的
+        sign_in: ["plugin.php?id=k_misign:sign&operation=qiandao"], // 签到的
     }, // 网址主机的目录
     keyword: {
         online: [/退出/], // 在线的
-        signed: [/ (您的签到排名：)(.*) /, /(您的签到排名：).*i>(.*)<\/i/], // 已经签到的
+        signed: [/ (您的签到排名：)([^ ]+) /, /(您的签到排名：).*i>([^ ]+)<\/i/], // 已经签到的
+        filter: [/已/, /成功/], // 过滤正常消息的
     }, // 检查是否在线时的关键词
     hook: {
         get_log_in: async function (site, param) {
@@ -37,13 +38,17 @@ let discuz_k = {
         post_sign_in: async function (site, param, data) {
             try {
                 /* 配置推送信息 */
-                let sign_url = data.data.match(/<a id="JD_sign".* href="(.*?)"/)[1];
+                let formhash = "";
+                let table_fh = [/formhash=([^&"]+)/, /name="formhash" value="([^"]+)/];
+                for (let item of table_fh) if (!!(formhash = data.data.match(item))) break;
+                formhash = formhash[1];
 
-                /* 推送签到信息 */
-                let data_psi = await axios.post(`${site.scheme}://${site.domain}/${sign_url}`);
+                /* 推送签到信息, 正则匹配消息 */
+                let data_psi = await axios.post(site.url.post, `formhash=${formhash}&format=empty`),
+                    msg_psi = data_psi.data.match(/CDATA\[([^\]]*)\]/)[1];
 
-                /* 正则匹配消息 */
-                return { code: 0, data: "签到成功" };
+                /* 返回消息 */
+                return { code: 0, data: msg_psi.length ? msg_psi : "签到成功" };
             } catch (exception) {
                 return { code: 1, data: "签到失败" };
             }

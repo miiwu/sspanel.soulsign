@@ -46,8 +46,10 @@
 
                - `.online`<sup>*string[] -> regexp[]*</sup>：在线的
                - `.signed`<sup>*string[] -> regexp[]* + *optional*</sup>：已经签到的
+               - `.filter`<sup>*string[] -> regexp[]*</sup>：过滤正常消息的
                
             5. `.hook`<sup>*object*</sup>：钩子
+               
                - `.get_log_in`<sup>*async function (site, param){}*</sup>：获取网址登录信息的
                  1. `site`<sup>*object*</sup>：当前网站
                  2. `param`<sup>*object*</sup>：脚本头中定义的参数
@@ -139,6 +141,10 @@
             5. `keyword_signed`：已签到的关键字
 
                格式同 `site_config.keyword`
+               
+            6. `keyword_filter`：过滤正常消息的
+
+               格式同 `site_config.filter`
 
             注：均使用 `,` 分隔
 
@@ -154,6 +160,7 @@
             // @param             path_sign_in 签到路径,<i/cat>,</i/dog>
             // @param             keyword_online 在线关键字,</cat/>,<dog>
             // @param             keyword_signed 已签到关键字,</cat/>,<dog>
+            // @param             keyword_filter 过滤正常消息关键字,</cat/>,<dog>
             // ...
             // ==/UserScript==
             
@@ -209,6 +216,8 @@
 
   - [sspanel.js](/application/sspanel.js)
   - [discuz.js](/application/discuz.js)
+  - [discuz.k.js](/application/discuz.k.js)
+  - [discuz.dc.js](/application/discuz.dc.js)
   - [nexusphp.js](/application/nexusphp.js)
   - [natfrp.js](/application/natfrp.js)
 
@@ -225,18 +234,26 @@
 - [x] 自定义 `已签到` 通知文字，需配置 `.hook.notify_sign_in` 和 `.keyword.signed` 为 `均有效`
 - [ ] 渲染、格式化 `执行结果`
 - [ ] 处理 `未登录` 时的多网站登录问题，需 `自行分别登录`，~~点击 `执行结果` 里渲染后的超链接|点击`是否在线`，`@LoginURL` 填写某服务器某网页，当执行完成时 `post` `执行结果` 到 `@LoginURL`~~
-- [ ] 处理某个域名 `无响应`，导致整个脚本超时
+- [ ] 完全使用 `表驱动法` 重构 [~~，减少相似的表，缩减代码体积<sup>小声哔哔</sup>~~](https://github.com/miiwu/sspanel.soulsign/tree/dev.re)
 
 ## 更新
 
-### 1.2.13
+### 1.2.14
 
-  1. 修复 `网络连接中断时` 的异常情况
+  1. 重构 `assert()`，使用 `operate_table()`
+  2. 改良 `discuz.?.js`，获取哈希值的办法
+  3. 修改 `match_keyword()`，支持 `正/反性关键词`
+  4. 增加 `.keyword.filter`，可以过滤消息并设置为 `非警告` 级别
+  5. 修复 `discuz.k.js`，消息提示问题
 
 <details>
 <summary>变更日志</summary>
 
+### 1.2.13
+
+  1. 修复 `网络连接中断时` 的异常情况
 ### 1.2.12
+
   1. 增加 `discuz.dc` & `discuz.k`
   2. 支持 `param_config.path_xxx` & `param_config.keyword_signed`
   3. 重写 `config_path()`，用到了 `operate_table()`
@@ -338,11 +355,13 @@
 
 ## 鸣谢
 
-所有给予灵感的人儿们
+所有给予灵感和帮助的人儿们
 
-## Soul Sign
+- ### Soul Sign
 
-- [github](https://github.com/inu1255/soulsign-chrome)
-- [chrome extension](https://chrome.google.com/webstore/detail/%E9%AD%82%E7%AD%BE/llbielhggjekmfjikgkcaloghnibafdl?hl=zh-CN)
-- [firefox addon](https://addons.mozilla.org/zh-CN/firefox/addon/%E9%AD%82%E7%AD%BE)
-- [soul sign scripts](https://soulsign.inu1255.cn) & [my scripts](https://soulsign.inu1255.cn/?uid=1178)
+  - [github](https://github.com/inu1255/soulsign-chrome)
+  - [chrome extension](https://chrome.google.com/webstore/detail/%E9%AD%82%E7%AD%BE/llbielhggjekmfjikgkcaloghnibafdl?hl=zh-CN)
+  - [firefox addon](https://addons.mozilla.org/zh-CN/firefox/addon/%E9%AD%82%E7%AD%BE)
+  - [soul sign scripts](https://soulsign.inu1255.cn) & [my scripts](https://soulsign.inu1255.cn/?uid=1178)
+
+- ### [yi-Xu-0100](https://github.com/yi-Xu-0100) / [soulsign-scripts](https://github.com/yi-Xu-0100/soulsign-scripts)
