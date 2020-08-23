@@ -2,29 +2,31 @@
 // @name              mmc
 // @namespace         https://soulsign.inu1255.cn/scripts/218
 // @updateURL         https://soulsign.inu1255.cn/script/Miao-Mico/mmc
-// @version           1.2.14
+// @version           1.2.15
 // @author            Miao-Mico
 // @expire            2000000
-// @domain            *.*
-// @domain            *.*.*
+// @domain            *
 // @grant             eval
 // ==/UserScript==
 
 (function () {
     const about = {
         author: "M-M", // 作者
-        version: "1.2.14", // 版本
+        version: "1.2.15", // 版本
         licence: "Apache-2.0 License", // 许可
         trademark: "❤️ mmc ❤️", // 标志
     }; // 关于
 
-    const emphasizes = { correct: "✔", system_fault: "⁉️", site_error: "❗" };
-
     const system = "system";
+
+    let soulsign = {
+        detail: false, // 是否支持细节列表
+    };
 
     var debugs = {
         enable: false, // 是否开启
         system: [], // 存放系统日志
+        exception: [],
     }; // 调试
 
     var asserts = {
@@ -45,14 +47,14 @@
     }; // 日志
 
     var hooks = {
-        type: 3,
+        type: 5,
     }; // 钩子
 
     var keywords = {
         mismatch: [], // 不匹配的
         online: [], // 在线的
         signed: [], // 签过到的
-        filter: [], // 需警告的
+        signing: [], // 正签过的
     }; // 关键字
 
     var configs = {
@@ -86,67 +88,35 @@
         return message;
     }
 
-    async function system_format({ object = system, code = 0, message = "" }) {
-        let string_sf = "";
+    async function system_notify(level, summary, detail = []) {
+        await system_log_core("system_notify()", 0, { level: level, message: detail });
 
-        for (let cnt = 0; cnt < arguments.length; cnt++) {
-            let format = {
-                emphasize: "",
-                object: "",
-                message: "",
-            };
+        let package = {};
 
-            try {
-                let emphasize = 0;
-                if (RegExp(system).test(arguments[cnt].object.toString())) {
-                    if (arguments[cnt].code) {
-                        emphasize = emphasizes.system_fault;
-                    }
-                } else {
-                    format.object = `${arguments[cnt].object.domain}: `;
-
-                    if (arguments[cnt].code) {
-                        emphasize = emphasizes.site_error;
-                    }
-                }
-
-                if (!arguments[cnt].code) {
-                    emphasize = emphasizes.correct;
-                }
-
-                format.emphasize = ` ${emphasize} `;
-                format.message = arguments[cnt].message;
-            } catch (exception) {
-                format.emphasize = "";
-                format.object = "";
-                format.message = arguments[cnt];
-            } // 读取格式
-
-            await system_log_core("system_format()", 0, format);
-
-            /* 格式化输出 */
-            string_sf = string_sf.concat(format.emphasize, format.object, format.message);
+        if (debugs.exception.length) {
+            level += 1;
+            package = about.trademark + `${soulsign.detail ? "</br>" : " "}` + JSON.stringify(debugs.exception);
+        } else if (!soulsign.detail) {
+            package = about.trademark;
+            for (let idx = 0; idx < detail.length; idx++) {
+                let item = detail[idx];
+                package += ` ${item.errno ? "❗" : "✔"} ${item.domain}: ${item.message}`;
+            }
+        } else {
+            package = { summary: `${about.trademark}</br>` + summary, detail };
         }
 
-        return await system_log_core("system_format()", 0, string_sf);
-    }
-
-    async function system_notify(level, message = { object: system, code: 0, message: "" }) {
-        let string_sn = about.trademark + (await system_format(message));
-
-        await system_log_core("system_notify()", 0, { level: level, message: message });
-
         if (level) {
-            throw string_sn;
+            throw package;
         } else {
-            return string_sn;
+            return package;
         }
     }
 
     async function system_log(object, code, message) {
         /* 抛出系统错误 */
-        if (RegExp(system).test(object)) {
-            await system_notify(code, message);
+        if (system === object && code) {
+            debugs.exception.push(message);
         }
 
         return await system_log_core(object, code, message);
@@ -203,59 +173,71 @@
                 index: site.index,
                 code: code,
                 message: message,
-                persistence: persistence ? message : "",
+                persistence: [persistence ? message : ""],
             });
-        } else {
+        } else if (false === code || 0 === code || Number(logs.pool[site.index].code) <= Number(code)) {
             /* 修改为最新 log */
             logs.pool[site.index].code = code;
             logs.pool[site.index].message = message;
 
             if (persistence) {
-                logs.pool[site.index].persistence = message;
+                logs.pool[site.index].persistence.push(message);
             } // 持久化当前消息
-        }
+        } // 只有等级够了才能覆写
 
         /* 记录异常或错误等级 */
         logs.level = 0;
         for (let index = 0; index < logs.pool.length; index++) {
             logs.level = logs.level + logs.pool[index].code;
         }
+
         await system_log("record_log()", 0, { domain: site.domain, levels: logs.level, message: message });
 
         return message;
     } // 记录日志
 
     async function persistence_log(site) {
-        return logs.pool[site.index].persistence;
+        let persistence_pl = logs.pool[site.index].persistence;
+        return persistence_pl[persistence_pl.length - 1];
     } // 取出持久化的消息
 
     async function view_log(level = 0) {
         await system_log("view_log()", 0, `debugs enable: ${debugs.enable}`);
 
-        let log_string = "";
+        let summary = "",
+            detail = [],
+            ok = 0;
 
         /* 从索引转换到域名 */
         for (let cnt = 0; cnt < logs.pool.length; cnt++) {
+            let item = {
+                url: urls.site[cnt],
+                pool: logs.pool[cnt],
+            };
+
             /* 非完整时跳过正确的 */
-            if (!level && !logs.pool[cnt].code) {
-                continue;
+            if (!item.pool.code) {
+                ok++;
+
+                if (!level) continue;
             }
 
-            /* 格式化输出 */
-            log_string = log_string.concat(
-                await system_format({
-                    object: urls.site[cnt],
-                    code: logs.pool[cnt].code,
-                    message: logs.pool[cnt].message,
-                })
-            );
+            detail.push({
+                domain: item.url.domain,
+                url: item.pool.code ? urls.site[cnt].url.get : `${item.url.scheme}://${item.url.domain}`,
+                errno: item.pool.code,
+                message: item.pool.message,
+                log: item.pool.persistence,
+            });
         }
 
+        summary = `成功: ${ok} 失败: ${logs.pool.length - ok}`;
+
         if (debugs.enable) {
-            return { debug: await debug(level), notify: { level: logs.level, message: log_string } };
-        } else {
-            return await system_notify(logs.level, log_string);
+            detail = { debug: await debug(level), notify: { level: logs.level, summary, detail } };
         }
+
+        return await system_notify(logs.level, summary, detail);
     } // 打印日志
 
     async function operate_table(table, operator = async function (item, index) {}, argument = []) {
@@ -381,32 +363,37 @@
                         config: [
                             site_config.keyword.online,
                             site_config.keyword.signed,
-                            site_config.keyword.filter,
+                            site_config.keyword.signing,
                             param_config.keyword_online,
                             param_config.keyword_signed,
-                            param_config.keyword_filter,
+                            param_config.keyword_signing,
                         ],
                         assert: [
                             `keyword.site.online`,
                             `keyword.site.signed`,
-                            `keyword.site.filter`,
+                            `keyword.site.signing`,
                             `keyword.param.online`,
                             `keyword.param.signed`,
-                            `keyword.param.filter`,
+                            `keyword.param.signing`,
                         ],
                         message: "keyword",
-                        alarm: [
-                            { box: ["null.box[0]", "null.box[4]"], trigger: 1, message: `online 为空` },
-                            { box: ["null.box[2]", "null.box[5]"], trigger: 1, message: `filter 为空` },
-                        ],
+                        alarm: [{ box: ["null.box[0]", "null.box[3]"], trigger: 1, message: `online 为空` }],
                     },
                     {
                         config: [
                             site_config.hook.get_log_in,
                             site_config.hook.post_sign_in,
-                            site_config.hook.notify_sign_in,
+                            site_config.hook.notify_signed,
+                            site_config.hook.notify_signing,
+                            site_config.hook.filter_unbefitting,
                         ],
-                        assert: [`hook.get_log_in`, `hook.post_sign_in`, `hook.notify_sign_in`],
+                        assert: [
+                            `hook.get_log_in`,
+                            `hook.post_sign_in`,
+                            `hook.notify_signed`,
+                            `hook.notify_signing`,
+                            `hook.filter_unbefitting`,
+                        ],
                         message: "hook",
                         alarm: [
                             { box: ["null.box[0]"], trigger: 0, message: `get_log_in 为空` },
@@ -421,7 +408,16 @@
         } catch (exception) {
             if (/TypeError/.test(exception.name)) {
                 let table = [
-                    { member: "hook", regexp: ["get_log_in", "post_sign_in", "notify_sign_in"] },
+                    {
+                        member: "hook",
+                        regexp: [
+                            "get_log_in",
+                            "post_sign_in",
+                            "hook.notify_signed",
+                            "hook.notify_signing",
+                            "hook.filter_unbefitting",
+                        ],
+                    },
                     { member: "path", regexp: ["log_in", "sign_in"] },
                     { member: "keyword", regexp: ["online", "signed"] },
                 ];
@@ -434,7 +430,7 @@
                     }
                 }
             } else {
-                throw exception;
+                await system_log(system, 1, exception);
             }
         }
 
@@ -453,9 +449,21 @@
                 { type: "get_log_in", default: {} },
                 { type: "post_sign_in", default: {} },
                 {
-                    type: "notify_sign_in",
+                    type: "notify_signed",
                     default: async function () {
-                        return { code: 1 };
+                        return { code: 0 };
+                    },
+                },
+                {
+                    type: "notify_signing",
+                    default: async function () {
+                        return { code: 0 };
+                    },
+                },
+                {
+                    type: "filter_unbefitting",
+                    default: async function () {
+                        return { code: 0 };
                     },
                 },
             ],
@@ -484,10 +492,13 @@
             await system_log(system, 1, "没有这个 hook");
         }
 
+        let persistence_hh = await persistence_log(site),
+            data_hh = "";
+
         /* 配置参数 */
         await operate_item(
             hook.index,
-            [["site", "configs.param"], ["site", "configs.param", "logs.pool[site.index].persistence"], []],
+            [["site", "configs.param"], ["site", "configs.param", `persistence_hh`], [], [], [`persistence_hh`]],
             async function (item) {
                 for (let index = 0; index < item.length; index++) {
                     eval(`argument.push(${item[index]})`);
@@ -503,7 +514,12 @@
         );
 
         /* 执行钩子 */
-        let data_hh = await hook.function(argument[0], argument[1], argument[2], argument[3]);
+        try {
+            data_hh = await hook.function(argument[0], argument[1], argument[2], argument[3]);
+        } catch (exception) {
+            if (!!exception.message) exception = exception.message;
+            await record_log(site, 5, `.hook.${hook.function.name}(): ${exception}`, true);
+        }
 
         /* 排查传入参数有没有被修改，然后返回 */
         await system_log("handle_hook()", 0, argument);
@@ -548,7 +564,7 @@
 
                     eval(`urls.path.${path.type}`).push(await system_log("config_path()", 0, path_cp));
                 } catch (exception) {
-                    throw exception;
+                    await system_log(system, 1, { exception, func: "config_path()" });
                 }
             }
         } // 配置路径
@@ -610,17 +626,17 @@
         keywords.mismatch.length = 0;
         keywords.online.length = 0;
         keywords.signed.length = 0;
-        keywords.filter.length = 0;
+        keywords.signing.length = 0;
 
         /* 配置关键字 */
         await operate_table(
             [
-                { keyword: "online", assert: "site.online", config: "site.keyword.online" },
-                { keyword: "signed", assert: "site.signed", config: "site.keyword.signed" },
-                { keyword: "filter", assert: "site.filter", config: "site.keyword.filter" },
                 { keyword: "online", assert: "param.online", config: "param.keyword_online.split(separator)" },
                 { keyword: "signed", assert: "param.signed", config: "param.keyword_signed.split(separator)" },
-                { keyword: "filter", assert: "param.filter", config: "param.keyword_filter.split(separator)" },
+                { keyword: "signing", assert: "param.signing", config: "param.keyword_signing.split(separator)" },
+                { keyword: "online", assert: "site.online", config: "site.keyword.online" },
+                { keyword: "signed", assert: "site.signed", config: "site.keyword.signed" },
+                { keyword: "signing", assert: "site.signing", config: "site.keyword.signing" },
             ],
             async function (item) {
                 if (eval(`asserts.keyword.${item.assert}`)) {
@@ -636,6 +652,8 @@
     async function update_config(site_config, param_config, debug_enable) {
         /* 使能调试 */
         debugs.enable = debug_enable;
+        debugs.system.length = 0;
+        debugs.exception.length = 0;
 
         /* 断言参数 */
         await assert(site_config, param_config);
@@ -656,7 +674,7 @@
 
         /* 配置日志 */
         await config_variable(logs.pool, async function () {
-            return { index: 0, code: 0, message: "" };
+            return { index: 0, code: 0, message: "", persistence: [] };
         });
     } // 更新配置
 
@@ -717,7 +735,7 @@
 
                     update = true;
                 } else {
-                    throw exception;
+                    await system_log(system, 1, { exception, func: "method_site()" });
                 }
             } finally {
                 await system_log("method_site()", 0, `update? ${update}`);
@@ -733,6 +751,7 @@
 
     async function match_keyword(site, data, keyword, property, message, notify = async function () {}) {
         let matches_mkl = keyword.length;
+        let boolean_mk = undefined;
 
         for (let index = 0; index < keyword.length; index++) {
             let array_mkl = data.match(RegExp(keyword[index])),
@@ -742,7 +761,7 @@
 
             if (match_mkl) {
                 /* 个性化通知文字 */
-                await system_log("match_keyword()", 0, await notify(array_mkl, message));
+                await system_log("match_keyword()", 0, (boolean_mk = await notify(array_mkl, message)));
 
                 break;
             } else {
@@ -757,8 +776,8 @@
             }
         }
 
-        let boolean_mk = property.positive ? !matches_mkl : !!matches_mkl;
-        await record_log(site, boolean_mk, message[Number(!matches_mkl)]);
+        if (undefined === boolean_mk) boolean_mk = property.positive ? !matches_mkl : !!matches_mkl;
+        await record_log(site, boolean_mk, message[Number(boolean_mk)]);
         return await system_log("match_keyword()", 0, boolean_mk);
     }
 
@@ -771,11 +790,21 @@
             hooks.get_log_in,
             "检查在线状态失败",
             async function (site, data) {
-                /* 判断 是否在线 的关键词 ，应存在的 */
-                return await match_keyword(site, data.data.data, keywords.online, { name: "online", positive: true }, [
-                    "已登录",
-                    "未登录",
-                ]);
+                let data_cos = await handle_hook(hooks.filter_unbefitting, site);
+
+                if (!data_cos.code) {
+                    /* 判断 是否在线 的关键词 ，应存在的 */
+                    return await match_keyword(
+                        site,
+                        data.data.data,
+                        keywords.online,
+                        { name: "online", positive: true },
+                        ["已登录", "未登录"]
+                    );
+                } else {
+                    await record_log(site, data_cos.code, data_cos.message || "不适配");
+                    return true;
+                }
             }
         );
 
@@ -800,11 +829,9 @@
                         { name: "signed", positive: true },
                         ["已签到", "未签到"],
                         async function (array, message) {
-                            let data_mk = await handle_hook(hooks.notify_sign_in, site, [array]);
-
-                            if (!data_mk.code) {
-                                message[0] = data_mk.data;
-                            }
+                            let data_mk_nsd = await handle_hook(hooks.notify_signed, site, [array]);
+                            if (!!data_mk_nsd.data) message[Number(data_mk_nsd.code)] = data_mk_nsd.data;
+                            return data_mk_nsd.code;
                         }
                     ));
                 }
@@ -821,16 +848,26 @@
                     hooks.post_sign_in,
                     "推送签到信息失败",
                     async function (site, data) {
-                        let message = await persistence_log(site);
+                        let boolean_ms_p = false;
+                        if (asserts.keyword.site.signing || asserts.keyword.param.signing) {
+                            let message = await persistence_log(site);
 
-                        /* 判断 警告消息 的关键词 */
-                        return await match_keyword(
-                            site,
-                            data.data,
-                            keywords.filter,
-                            { name: "filter", positive: true },
-                            [message, message]
-                        );
+                            /* 判断 警告消息 的关键词 */
+                            boolean_ms_p = await match_keyword(
+                                site,
+                                data.data,
+                                keywords.signing,
+                                { name: "signing", positive: true },
+                                ["签到成功", "签到失败"],
+                                async function (array, message) {
+                                    let data_mk_nsg = await handle_hook(hooks.notify_signing, site, [array]);
+                                    if (!!data_mk_nsg.data) message[Number(data_mk_nsg.code)] = data_mk_nsg.data;
+                                    return data_mk_nsg.code;
+                                }
+                            );
+                        }
+
+                        return boolean_ms_p;
                     }
                 );
             }
@@ -866,9 +903,16 @@
         return await view_log(full_log);
     } // 签到
 
-    module.exports = async function (site_config, param_config, debug_enable = false) {
+    module.exports = async function (site_config, param_config, config = {}) {
+        config = Object.assign({ dbe: false, ssv: false }, config);
+
+        /* 是否支持细节 */
+        if ("function" == typeof config.ssv) {
+            soulsign.detail = Boolean(0 <= (await config.ssv("2.1.0")));
+        }
+
         /* 更新配置 */
-        await update_config(site_config, param_config, debug_enable);
+        await update_config(site_config, param_config, config.dbe);
 
         return {
             about: about, // 关于

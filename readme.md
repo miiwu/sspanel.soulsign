@@ -17,7 +17,7 @@
     ```javascript
 
     var mmc = await require(site_config.core);
-    var res = await mmc(site_config, param_config, debug_enable = false);
+    var res = await mmc(site_config, param_config, config = {});
     
     ```
     
@@ -42,14 +42,14 @@
 
             4. `.keyword`<sup>*object*</sup>：关键字
                
-               多个之间为 `逻辑或` 关系
+               多个之间为 `逻辑或` 关系，且优先级低于 `param_config` 中对应的选项
 
                - `.online`<sup>*string[] -> regexp[]*</sup>：在线的
-               - `.signed`<sup>*string[] -> regexp[]* + *optional*</sup>：已经签到的
-               - `.filter`<sup>*string[] -> regexp[]*</sup>：过滤正常消息的
+               - `.signed`<sup>*string[] -> regexp[]* + *optional*</sup>：已签到的
+               - `.signing`<sup>*string[] -> regexp[]* + *optional*</sup>：正签到的
                
             5. `.hook`<sup>*object*</sup>：钩子
-               
+
                - `.get_log_in`<sup>*async function (site, param){}*</sup>：获取网址登录信息的
                  1. `site`<sup>*object*</sup>：当前网站
                  2. `param`<sup>*object*</sup>：脚本头中定义的参数
@@ -57,30 +57,32 @@
                  1. `site`<sup>*object*</sup>：当前网站
                  2. `param`<sup>*object*</sup>：脚本头中定义的参数
                  3. `data`<sup>*string*</sup>：`.get_log_in` 中的返回值
-               - `.notify_sign_in`<sup>*async function (array){}* + *optional*</sup>：通知网址签到信息的
+               - `.notify_signed`<sup>*async function (array){}* + *optional*</sup>：自定义已经签到信息的
                  1. `array`<sup>*string[]*</sup>：`.keyword.signed` 中与 `.get_log_in` 中的返回值 **`正则匹配成功`** 后的数组
+               - `.notify_signing`<sup>*async function (array){}* + *optional*</sup>：自定义正在签到信息的
+                 1. `array`<sup>*string[]*</sup>：`.keyword.signing` 中与 `.post_sign_in` 中的返回值 **`正则匹配成功`** 后的数组
+               - `.filter_unbefitting`<sup>*async function (data){}* + *optional*</sup>：过滤不适配的
+                 1. `data`<sup>*string*</sup>：同 `.post_sign_in`
 
-            注：
-
-            - `site` 成员
-
-              1. `scheme`<sup>*string*</sup>：协议
-              2. `domain`<sup>*string*</sup>：域名
-              3. `url`<sup>*object*</sup>：URL
-                  - `get`<sup>*string*</sup>：配合 `axios.get()` 使用
-                  - `post`<sup>*string*</sup>：配合 `axios.post()` 使用
-
-            - `optional`
-
-              表示 `可选的`
-              
-            - `x -> y`
-
-              表示 `x`、`y` 均 `支持`，且 `x` 会 `默认转换` 为  `y`
-              
-            - `(x)`
-              
-              表示 `x` 为省略的部分
+            > - `site` 成员
+            >
+            >   1. `scheme`<sup>*string*</sup>：协议
+            >   2. `domain`<sup>*string*</sup>：域名
+            >   3. `url`<sup>*object*</sup>：URL
+            >      - `get`<sup>*string*</sup>：配合 `axios.get()` 使用
+            >      - `post`<sup>*string*</sup>：配合 `axios.post()` 使用
+            >
+            > - `optional`
+            >
+            >   表示 `可选的`
+            >
+            > - `x -> y`
+            >
+            >   表示 `x`、`y` 均 `支持`，且 `x` 会 `默认转换` 为  `y`
+            >
+            > - `(x)`
+            >
+            >   表示 `x` 为省略的部分
 
         - 例子
 
@@ -128,25 +130,19 @@
 
             2. `path_log_in`：登录路径
 
-               格式同 `site_config.path`
-
             3. `path_sign_in`：签到路径
 
-               格式同 `site_config.path`
+               格式同 `site_config.path` 中对应的选项
 
             4. `keyword_online`：在线的关键字
 
-               格式同 `site_config.keyword`
-
             5. `keyword_signed`：已签到的关键字
 
-               格式同 `site_config.keyword`
-               
-            6. `keyword_filter`：过滤正常消息的
+            6. `keyword_signing`：正签到的关键字
 
-               格式同 `site_config.filter`
+               格式同 `site_config.keyword` 中对应的选项
 
-            注：均使用 `,` 分隔
+            > 均使用 `,` 分隔
 
         - 例子
 
@@ -166,9 +162,19 @@
             
             ```
 
-    - **`debug_enable = false`**: 是否开启 `debug` 模式
+    - **`config= {}`**：配置
 
-        此时会记录和输出一些日志
+        - `dben = false`<sup>*bool*</sup>：是否开启 `debug` 模式
+        
+            > dben = debug_enable
+            
+            此时会记录和输出一些日志
+            
+        - `ssvs = false`<sup>*function*</sup>：引入 `soulsign` 版本
+        
+            > ssvs = soulsign_version
+            
+            兼容旧版本
 
 - **`res`** 成员
 
@@ -198,6 +204,8 @@
 
     7. `res.sign_in(full_log = false)`：登录
 
+        以下所列均为 `soulsigh v2.1.0` 以下适用
+
         - full_log = true
           - 成功：❤️ mmc ❤️ < [ ✔ 网站: 提示语] >
           - 失败：❤️ mmc ❤️ < [ ❗ 网站: 问题] / [ ✔ 网站: 提示语] >
@@ -205,7 +213,7 @@
           - 成功：❤️ mmc ❤️ 
           - 失败：❤️ mmc ❤️ < [ ❗ 网站: 问题] >
 
-        注：<...>，意为里面的内容是一个单元
+        > <...>，意为里面的内容是一个单元
 
     8. `res.check_online()`：检测是否在线
 
@@ -230,13 +238,44 @@
 - [x] 多种网站签到方式，需配置 `.hook.xxx` 
 - [x] 每种网站签到方式可以自动匹配多个不同网址，需配置 `@param path_xxx` 或 `.path.xxx`
 - [x] 每次调用脚本均刷新配置
-- [x] 多个网站域名设置，提示 `domain配置不正确`，暂采用 `*.*` & `*.*.*` & `*.*.*.*`
+- [x] 多个网站域名设置，已支持泛域名 `*`，兼容考虑，仍未移除 `*.*` & `*.*.*` & `*.*.*.*`
 - [x] 自定义 `已签到` 通知文字，需配置 `.hook.notify_sign_in` 和 `.keyword.signed` 为 `均有效`
-- [ ] 渲染、格式化 `执行结果`
-- [ ] 处理 `未登录` 时的多网站登录问题，需 `自行分别登录`，~~点击 `执行结果` 里渲染后的超链接|点击`是否在线`，`@LoginURL` 填写某服务器某网页，当执行完成时 `post` `执行结果` 到 `@LoginURL`~~
+- [x] 渲染、格式化 `执行结果`
+- [x] 处理 `未登录` 时的多网站登录问题，需 `自行分别登录`，点击 `执行结果` 进入 `日志` 页面，即可看到 `域名列表`，点击 `域名栏` 可跳转登录
+- [x] 支持过滤是否未适配的网站，需配置 `hook.filter_unbefitting`
+- [ ] 筛选每种网站的 `非敏感信息`，用作反馈
 - [ ] 完全使用 `表驱动法` 重构 [~~，减少相似的表，缩减代码体积<sup>小声哔哔</sup>~~](https://github.com/miiwu/sspanel.soulsign/tree/dev.re)
 
 ## 更新
+
+### 1.2.15
+
+1. 增加 `return.detail.log`，会记录每次网络请求的响应数据
+
+   每个域名下一般有 **2** 条响应数据，即 `.hook.get_log_in()` 和 `.hook.post_sign_in()`  中的两次 `axios`;
+
+   我并不会收集你的数据；
+
+   如果需复制反馈，请 **务必** 做 **脱敏处理**，里面会包含你的 **个人信息**。
+
+2. 适配 `*`，泛域名
+
+3. 对于 `关键字`，优先匹配用户配置
+
+4. 增加 `hook.notify_signing`，个性化正在签到消息提示，使用关键字 `keyword.signing`，可选
+
+5. 增加 `hook.filter_unbefitting`，过滤不适配的网站
+
+6. 修改 `hook.post_sign_in`，仅用于推送配置，然后返回响应数据
+
+7. 重命名，`filter` -> `signing`，`notify_sign_in` -> `notify_signed`
+
+8. 支持兼容不同 `soulsign` 版本
+
+9. 修复异常无法抛出的问题
+
+<details>
+<summary>变更日志</summary>
 
 ### 1.2.14
 
@@ -245,10 +284,6 @@
   3. 修改 `match_keyword()`，支持 `正/反性关键词`
   4. 增加 `.keyword.filter`，可以过滤消息并设置为 `非警告` 级别
   5. 修复 `discuz.k.js`，消息提示问题
-
-<details>
-<summary>变更日志</summary>
-
 ### 1.2.13
 
   1. 修复 `网络连接中断时` 的异常情况
